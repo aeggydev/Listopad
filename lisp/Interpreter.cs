@@ -118,7 +118,7 @@ public class Interpreter
 
         _environment.Set("atomp", new AtomP());
 
-        //ReadAndEvalute(Prelude);
+        ReadAndEvalute(Prelude);
     }
 
     public Expression Evaluate(Expression expression)

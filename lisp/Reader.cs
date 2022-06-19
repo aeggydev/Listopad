@@ -49,7 +49,7 @@ public static class Reader
                     } while (currentChar != '"');
                     tokens.Add(new StringAtomToken(stringContent.ToString()));
                     break;
-                case ' ':
+                case ' ' or '\r' or '\n':
                     tokens.Add(new WhitespaceToken());
                     break;
                 default:
@@ -57,7 +57,7 @@ public static class Reader
                     StringBuilder symbolContent = new();
                     char currentChar2 = str[i];
                     var isOutOfBounds = false;
-                    while (!isOutOfBounds && currentChar2 is not ' ' and not ')' and not '"'){
+                    while (!isOutOfBounds && currentChar2 is not ' ' and not ')' and not '"' and not '\r' and not '\n'){
                         symbolContent.Append(currentChar2);
                         isOutOfBounds = ++i >= str.Length;
                         currentChar2 = !isOutOfBounds ? str[i] : ' ';
