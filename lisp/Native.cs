@@ -34,7 +34,8 @@ public class Plus : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().Select(x => x.Evaluate(environment))
+        var argList = args
+            .Select(x => x.Evaluate(environment))
             .ToList();
         if (argList.Count == 0) throw new Exception("+ requires at least one argument");
         var sum = 0;
@@ -53,7 +54,8 @@ public class Minus : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().Select(x => x.Evaluate(environment))
+        var argList = args
+            .Select(x => x.Evaluate(environment))
             .ToList();
         if (argList.Any(x => x is not Atom { Type: AtomTypes.Integer or AtomTypes.Float }))
             throw new Exception("Arguments are not numbers");
@@ -110,7 +112,9 @@ public class ConsFunc : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().Select(x => x.Evaluate(environment)).ToList();
+        var argList = args
+            .Select(x => x.Evaluate(environment))
+            .ToList();
         var car = argList[0];
         var cdr = argList[1];
         return new Cons { Car = car, Cdr = cdr };
@@ -143,7 +147,9 @@ public class Eq : Native
     // TODO: Mimic behavior of Common Lisp
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().Select(x => x.Evaluate(environment)).ToList();
+        var argList = args
+            .Select(x => x.Evaluate(environment))
+            .ToList();
         if (argList.Count != 2) throw new Exception("eq requires exactly two arguments");
         if (argList[0] is not Atom atom1 || argList[1] is not Atom atom2)
             throw new Exception("eq requires arguments to be atoms");
@@ -157,7 +163,9 @@ public class And : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().Select(x => x.Evaluate(environment)).ToList();
+        var argList = args
+            .Select(x => x.Evaluate(environment))
+            .ToList();
         if (argList.Count == 0) throw new Exception("and requires at least one argument");
 
         foreach (var item in argList)
@@ -176,7 +184,9 @@ public class Or : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().Select(x => x.Evaluate(environment)).ToList();
+        var argList = args
+            .Select(x => x.Evaluate(environment))
+            .ToList();
         if (argList.Count == 0) throw new Exception("or requires at least one argument");
 
         foreach (var item in argList)
@@ -196,7 +206,7 @@ public class If : Native
     // TODO: Implement cond or when instead
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().ToList();
+        var argList = args.ToList();
         if (argList.Count != 3) throw new Exception("if requires exactly three arguments");
         var predicate = argList.First().Evaluate(environment);
         var isFalse = predicate is Atom { Type: AtomTypes.Boolean } predicateAtom && (bool)predicateAtom.Value == false;
@@ -211,7 +221,7 @@ public class Define : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().ToList();
+        var argList = args.ToList();
         if (argList.Count != 2) throw new Exception("define requires exactly two arguments");
 
         var name = argList.First();
@@ -261,7 +271,7 @@ public class ListFunc : Native
     protected override Expression Run(IEnvironment environment, Cons args)
     {
         // TODO: Make cons implement ienumerable
-        return Cons.FromIEnumerable(args.ToIEnumerable().Select(x => x.Evaluate(environment)));
+        return Cons.FromIEnumerable(args.Select(x => x.Evaluate(environment)));
     }
 }
 
@@ -269,7 +279,7 @@ public class BeginFunc : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().ToList();
+        var argList = args.ToList();
         Expression returnVal = null;
         foreach (var expression in argList)
         {
@@ -284,7 +294,7 @@ public class ApplyFunc : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var argList = args.ToIEnumerable().ToList();
+        var argList = args.ToList();
         if (argList.Count != 2) throw new Exception("apply requires two arguments");
 
         var function = args.Car.Evaluate(environment);

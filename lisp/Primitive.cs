@@ -47,7 +47,7 @@ public class Cons : Expression, IEnumerable<Expression>
     {
         if (Cdr is Cons or null) // Is a list
         {
-            var strings = ToIEnumerable().Select(x => x.GetString());
+            var strings = this.Select(x => x.GetString());
             return $"({string.Join(" ", strings)})";
         }
         else // Is a pair
@@ -70,21 +70,7 @@ public class Cons : Expression, IEnumerable<Expression>
         return list;
     }
 
-    public IEnumerable<Expression> ToIEnumerable()
-    {
-        var current = this;
-        while (current != null)
-        {
-            /*
-            if (current.Car is Cons { Cdr: Cons } car)
-                yield return car.ToIEnumerable();
-            else
-                */
-            yield return current.Car;
-
-            current = (Cons)current.Cdr;
-        }
-    }
+    // TODO: Implement indexing
 
     // Enable deconstructing
     public void Deconstruct(out Expression car, out Expression cdr)
@@ -196,7 +182,7 @@ public class Lambda : Expression
     {
         _environment = environment;
         
-        var argList = args.ToIEnumerable().ToList();
+        var argList = args.ToList();
         Arity = argList.Count;
         _parameters = argList.Select(x => (x as Atom).Value as string).ToList();
 
@@ -228,7 +214,7 @@ public class Lambda : Expression
         }
 
         Expression returnVal = null;
-        foreach (var expression in _body.ToIEnumerable())
+        foreach (var expression in _body)
         {
             returnVal = expression.Evaluate(_environment);
         }
