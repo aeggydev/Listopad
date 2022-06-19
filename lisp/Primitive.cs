@@ -93,6 +93,8 @@ public class Cons : Expression, IEnumerable<Expression>
     {
         return GetEnumerator();
     }
+
+    public Expression? this[int i] => this.Skip(i).First();
 }
 
 public enum AtomTypes
@@ -114,6 +116,24 @@ public class Atom : Expression
     {
         Value = value;
         Type = type;
+    }
+
+    public Atom(int value)
+    {
+        Value = value as object;
+        Type = AtomTypes.Integer;
+    }
+
+    public Atom(float value)
+    {
+        Value = value as object;
+        Type = AtomTypes.Float;
+    }
+    
+    public Atom(bool value)
+    {
+        Value = value as object;
+        Type = AtomTypes.Boolean;
     }
 
     public object Value { get; init; }
