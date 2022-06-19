@@ -91,9 +91,9 @@ public static class Reader
             case AtomToken atomToken:
                 if (tokens.Any() && topLevel)
                     throw new Exception("Trailing garbage following expression");
-                return ValueAtom.ParseString(atomToken.Name);
+                return ValueAtom<dynamic>.ParseString(atomToken.Name);
             case StringAtomToken stringAtomToken:
-                return new ValueAtom(stringAtomToken.Content);
+                return new StringAtom(stringAtomToken.Content);
             case OpeningParenToken:
                 List<Expression> expList = new();
                 while (tokens.First() is not ClosingParenToken)
@@ -107,19 +107,19 @@ public static class Reader
                 throw new Exception("Unexpected ')'");
             case QuoteToken:
                 var quoted = ParseTokens(tokens);
-                return new Cons { Car = quoted }.
-                    Wrap(new ValueAtom("quote", AtomTypes.Symbol));
+                return new Cons { Car = quoted }
+                    .Wrap(new SymbolAtom(new Symbol("quote")));
             case BackquoteToken:
                 var quoted2 = ParseTokens(tokens);
                 
                 throw new NotImplementedException();
                 // TODO: DRY this
-                if (quoted2 is not Cons)
-                    return new Cons
-                    {
-                        Car = new ValueAtom("quote", AtomTypes.Symbol),
-                        Cdr = new Cons{Car = quoted2}
-                    };
+                // if (quoted2 is not Cons)
+                //     return new Cons
+                //     {
+                //         Car = new ValueAtom("quote", AtomTypes.Symbol),
+                //         Cdr = new Cons{Car = quoted2}
+                //     };
             case NilToken:
                 throw new NotImplementedException();
             default:

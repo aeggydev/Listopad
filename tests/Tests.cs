@@ -15,11 +15,11 @@ public class InterpreterTests
         const string code = @"(+  1  2 3    4 (+ 1 2 5 ) 3  )";
         var data = Reader.ReadFromString(code).As<Cons>();
         Assert.Equal(7, data.Count());
-        Assert.Equal(new ValueAtom(2).Value, data[5]?.As<Cons>()[2]?.As<ValueAtom>().Value);
+        Assert.Equal(2, data[5]?.As<Cons>()[2]?.As<IntegerAtom>().Value);
 
         Interpreter interpreter = new();
         var result = interpreter.Evaluate(data);
-        Assert.Equal(21 as object, result.As<ValueAtom>().Value);
+        Assert.Equal(21 as object, result.As<IntegerAtom>().Value as object);
     }
 
     [Fact]
@@ -27,10 +27,10 @@ public class InterpreterTests
     {
         const string code = @"(begin (define foobar (lambda (lol) (inc (inc lol)))) (foobar 60))";
         var data = Reader.ReadFromString(code) as Cons;
-        Assert.Equal("define", data?[1]?.As<Cons>()[0]?.As<ValueAtom>().Value);
+        Assert.Equal("define", data?[1]?.As<Cons>()[0]?.As<SymbolAtom>().Value.Name);
 
         Interpreter interpreter = new();
-        Assert.Equal(62 as object, interpreter.Evaluate(data).As<ValueAtom>().Value);
+        Assert.Equal(62 as object, interpreter.Evaluate(data).As<IntegerAtom>().Value as object);
     }
 
     [Fact]
@@ -58,6 +58,15 @@ public class InterpreterTests
         var exception = Record.Exception(() => cons = interpreter.ReadAndEvalute(code).As<Cons>());
         Assert.Null(exception);
         Assert.Equal(3, cons?.Count());
+    }
+
+    [Fact]
+    public void Eq1()
+    {
+        const string code = @"(eq 1 1)";
+        Interpreter interpreter = new();
+        var expression = interpreter.ReadAndEvalute(code);
+        Assert.True(expression.As<BoolAtom>().Value);
     }
 
     [Fact]

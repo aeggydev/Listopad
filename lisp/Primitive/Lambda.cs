@@ -1,5 +1,6 @@
 ﻿namespace lisp.Primitive;
 
+// TODO: Should be atom
 public class Lambda : Expression
 {
     private readonly IEnvironment _environment;
@@ -13,7 +14,7 @@ public class Lambda : Expression
 
         var argList = args.ToList();
         Arity = argList.Count;
-        _parameters = argList.Select(x => (x as ValueAtom).Value as string).ToList();
+        _parameters = argList.Select(x => x.As<SymbolAtom>().Value.Name).ToList();
 
         _body = body;
     }

@@ -2,78 +2,77 @@
 
 namespace lisp.Primitive;
 
-public enum AtomTypes
+public record Symbol(string Name);
+
+public class SymbolAtom : ValueAtom<Symbol>
 {
-    Integer,
-    Float,
-    String,
-    Symbol,
-    Boolean
+    public SymbolAtom(Symbol value) : base(value) {}
+
+    public override string TypeString => "symbol";
+}
+public class StringAtom : ValueAtom<string>
+{
+    public StringAtom(string value) : base(value) {}
+
+    public override string TypeString => "string";
+}
+public class FloatAtom : ValueAtom<float>
+{
+    public FloatAtom(float value) : base(value) {}
+
+    public override string TypeString => "float";
 }
 
-public class ValueAtom : Atom
+public class IntegerAtom : ValueAtom<int>
+{
+    public IntegerAtom(int value) : base(value) {}
+
+    public override string TypeString => "integer";
+}
+public class BoolAtom : ValueAtom<bool>
+{
+    public BoolAtom(bool value) : base(value) {}
+
+    public override string TypeString => "bool";
+}
+
+public abstract class ValueAtom<T> : Atom
 {
     private static readonly Regex _floatRegex = new(@"-?\d+\.\d+", RegexOptions.Compiled);
     private static readonly Regex _intRegex = new(@"-?\d+", RegexOptions.Compiled);
 
-    public T GetValue<T>()
+    public T GetValue()
     {
-        return (T)Value;
+        return Value;
     }
 
-    public ValueAtom(object value, AtomTypes type)
-    {
-        Value = value;
-        Type = type;
-    }
-
-    public ValueAtom(int value)
-    {
-        Value = value as object;
-        Type = AtomTypes.Integer;
-    }
-
-    public ValueAtom(float value)
-    {
-        Value = value as object;
-        Type = AtomTypes.Float;
-    }
-
-    public ValueAtom(bool value)
-    {
-        Value = value as object;
-        Type = AtomTypes.Boolean;
-    }
-
-    public ValueAtom(string value)
+    protected ValueAtom(T value)
     {
         Value = value;
-        Type = AtomTypes.String;
     }
 
-    public object Value { get; init; }
-    public AtomTypes Type { get; init; }
-    public string TypeString => Enum.GetName(Type)?.ToLower() ?? "error";
+    public T Value { get; init; }
+    public abstract string TypeString { get; }
 
-    public static ValueAtom ParseString(string str)
+    public static Atom ParseString(string str)
     {
         if (_floatRegex.IsMatch(str))
         {
             var val = float.Parse(str);
-            return new ValueAtom(val as object, AtomTypes.Float);
+            return new FloatAtom(val);
         }
 
         if (_intRegex.IsMatch(str))
         {
             var val = int.Parse(str);
-            return new ValueAtom(val as object, AtomTypes.Integer);
+            return new IntegerAtom(val);
         }
 
         return str switch
         {
-            "#t" => new ValueAtom(true as object, AtomTypes.Boolean),
-            "#f" => new ValueAtom(false as object, AtomTypes.Boolean),
-            _ => new ValueAtom(str, AtomTypes.Symbol)
+            "#t" => new BoolAtom(true),
+            "#f" => new BoolAtom(false),
+            _ => new SymbolAtom(new Symbol(str))
         };
     }
 
@@ -81,7 +80,7 @@ public class ValueAtom : Atom
     {
         return this switch
         {
-            { Type: AtomTypes.Symbol } => environment.Get((string)Value),
+            SymbolAtom symbolAtom => environment.Get(symbolAtom.Value.Name),
             _ => this
         };
     }
@@ -90,8 +89,8 @@ public class ValueAtom : Atom
     {
         return this switch
         {
-            { Type: AtomTypes.Boolean } atomBool => (bool)atomBool.Value ? "#t" : "#f",
-            { Type: AtomTypes.String } atomString => $"\"{atomString.Value}\"",
+            BoolAtom atomBool => atomBool.Value ? "#t" : "#f",
+            StringAtom atomString => $"\"{atomString.Value}\"",
             _ => Value.ToString() ?? "ERROR"
         };
     }

@@ -15,6 +15,11 @@ public abstract class Expression
         };
     }
 
+    public T UncheckedAs<T>() where T : Expression
+    {
+        return (T)this;
+    }
+
     public Cons Wrap(Expression wrapWith)
     {
         return new Cons { Car = wrapWith, Cdr = this };
