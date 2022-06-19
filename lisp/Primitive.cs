@@ -6,11 +6,11 @@ namespace lisp;
 public abstract class Expression
 {
     public abstract Expression Evaluate(IEnvironment environment);
+
     public abstract string GetString();
     // public abstract string Princ();
     // public override string ToString() => Prin1();
 }
-
 
 public class Cons : Expression, IEnumerable<Expression>
 {
@@ -23,7 +23,7 @@ public class Cons : Expression, IEnumerable<Expression>
         var expression = Car switch
         {
             Cons consCar => consCar.Evaluate(environment),
-            Atom {Type:AtomTypes.Symbol} atomCar => environment.Get(atomCar.Value as string),
+            Atom { Type: AtomTypes.Symbol } atomCar => environment.Get(atomCar.Value as string),
             Lambda => Car,
             Native => Car,
             _ => throw new Exception("Illegal function call")
@@ -35,6 +35,7 @@ public class Cons : Expression, IEnumerable<Expression>
             environment.Set("*ARGS*", Cdr);
             return native.Evaluate(environment);
         }
+
         if (expression is Lambda lambda)
         {
             return lambda.Run(environment, Cdr as Cons);
@@ -111,7 +112,7 @@ public class Atom : Expression
 {
     private static readonly Regex _floatRegex = new(@"-?\d+\.\d+", RegexOptions.Compiled);
     private static readonly Regex _intRegex = new(@"-?\d+", RegexOptions.Compiled);
-    
+
     public Atom(object value, AtomTypes type)
     {
         Value = value;
@@ -129,21 +130,22 @@ public class Atom : Expression
         Value = value as object;
         Type = AtomTypes.Float;
     }
-    
+
     public Atom(bool value)
     {
         Value = value as object;
         Type = AtomTypes.Boolean;
     }
 
+    public Atom(string value)
+    {
+        Value = value;
+        Type = AtomTypes.String;
+    }
+
     public object Value { get; init; }
     public AtomTypes Type { get; init; }
     public string TypeString => Enum.GetName(Type)?.ToLower() ?? "error";
-
-    public static Atom FromString(string str)
-    {
-        return new Atom(str, AtomTypes.String);
-    }
 
     public static Atom ParseString(string str)
     {
@@ -185,7 +187,8 @@ public class Atom : Expression
     {
         return this switch
         {
-            {Type: AtomTypes.Boolean} atomBool => (bool)atomBool.Value ? "#t" : "#f",
+            { Type: AtomTypes.Boolean } atomBool => (bool)atomBool.Value ? "#t" : "#f",
+            { Type: AtomTypes.String } atomString => $"\"{atomString.Value}\"",
             _ => Value.ToString() ?? "ERROR"
         };
     }
@@ -201,7 +204,7 @@ public class Lambda : Expression
     public Lambda(IEnvironment environment, Cons args, Cons body)
     {
         _environment = environment;
-        
+
         var argList = args.ToList();
         Arity = argList.Count;
         _parameters = argList.Select(x => (x as Atom).Value as string).ToList();
@@ -209,7 +212,7 @@ public class Lambda : Expression
         _body = body;
     }
     // TODO: Implement variadic functions
-    
+
     public override Expression Evaluate(IEnvironment environment)
     {
         return this;
@@ -237,8 +240,8 @@ public class Lambda : Expression
             })
             .ToList();
         if ((argList?.Count ?? 0) != Arity) throw new Exception("Wrong number of arguments");
-        
-        _environment.NewFrame(); 
+
+        _environment.NewFrame();
         for (var i = 0; i < Arity; i++)
         {
             _environment.Set(_parameters[i], argList![i]);
@@ -249,6 +252,7 @@ public class Lambda : Expression
         {
             returnVal = expression.Evaluate(_environment);
         }
+
         _environment.PopFrame();
 
         return returnVal;

@@ -118,7 +118,7 @@ public class Interpreter
 
         _environment.Set("atomp", new AtomP());
 
-        ReadAndEvalute(Prelude);
+        //ReadAndEvalute(Prelude);
     }
 
     public Expression Evaluate(Expression expression)
@@ -129,7 +129,7 @@ public class Interpreter
 
     public Expression ReadAndEvalute(string code)
     {
-        return Evaluate(Reader.ReadFromString(code));
+        return Evaluate(Reader.Reader.ReadFromString(code));
     }
 
     private const string Prelude = @"
