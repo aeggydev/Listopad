@@ -216,7 +216,9 @@ public class Lambda : Expression
 
     public Expression Run(Cons? args)
     {
-        var argList = args?.ToIEnumerable().ToList();
+        var argList = args?
+            .Select(x => x.Evaluate(_environment))
+            .ToList();
         if ((argList?.Count ?? 0) != Arity) throw new Exception("Wrong number of arguments");
         
         _environment.NewFrame(); 
