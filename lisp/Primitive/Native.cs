@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace lisp;
+namespace lisp.Primitive;
 
 // TODO: Make this less verbose
 public abstract class Native : Expression

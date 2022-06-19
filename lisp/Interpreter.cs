@@ -1,4 +1,6 @@
-﻿namespace lisp;
+﻿using lisp.Primitive;
+
+namespace lisp;
 
 public interface IEnvironment
 {

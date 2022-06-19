@@ -1,8 +1,9 @@
 ﻿using System.Text;
+using lisp.Primitive;
 
 namespace lisp.Reader;
 
-public record Token();
+public record Token;
 
 public record OpeningParenToken : Token;
 
