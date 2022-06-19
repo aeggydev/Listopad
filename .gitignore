@@ -1,3 +1,9 @@
 ﻿/.idea
+
 /lisp/obj
 /lisp/bin
+
+/tests/obj
+/tests/bin
+
+*.sln.DotSettings.user

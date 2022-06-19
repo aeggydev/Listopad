@@ -37,7 +37,7 @@ public class Cons : Expression, IEnumerable<Expression>
         }
         if (expression is Lambda lambda)
         {
-            return lambda.Run(Cdr as Cons);
+            return lambda.Run(environment, Cdr as Cons);
         }
 
         throw new Exception("Don't know");
@@ -220,10 +220,21 @@ public class Lambda : Expression
         return $"#<FUNCTION (LAMBDA ({string.Join(" ", _parameters)})) {{{GetHashCode()}}}>";
     }
 
-    public Expression Run(Cons? args)
+    public Expression Run(IEnvironment environment, Cons? args)
     {
         var argList = args?
-            .Select(x => x.Evaluate(_environment))
+            .Select(x =>
+            {
+                // TODO: This is a horrible way to do it; fix it
+                try
+                {
+                    return x.Evaluate(_environment);
+                }
+                catch
+                {
+                    return x.Evaluate(environment);
+                }
+            })
             .ToList();
         if ((argList?.Count ?? 0) != Arity) throw new Exception("Wrong number of arguments");
         

@@ -117,14 +117,19 @@ public class Interpreter
         _environment.Set("lambda", new LambdaFunc());
 
         _environment.Set("atomp", new AtomP());
-        
-        Evaluate(Reader.ReadFromString(Prelude));
+
+        ReadAndEvalute(Prelude);
     }
 
     public Expression Evaluate(Expression expression)
     {
         var returnValue = expression.Evaluate(_environment);
         return returnValue;
+    }
+
+    public Expression ReadAndEvalute(string code)
+    {
+        return Evaluate(Reader.ReadFromString(code));
     }
 
     private const string Prelude = @"
