@@ -7,6 +7,7 @@ public class Cons : Expression, IEnumerable<Expression>
     public Expression? Car { get; set; }
     public Expression? Cdr { get; set; }
     public bool IsList => Cdr is Cons or null;
+    public override object ToCompare => this;
 
     public override Expression Evaluate(IEnvironment environment)
     {

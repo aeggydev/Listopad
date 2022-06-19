@@ -46,6 +46,8 @@ public abstract class ValueAtom<T> : Atom
         return Value;
     }
 
+    public override object ToCompare => Value as object;
+
     protected ValueAtom(T value)
     {
         Value = value;
@@ -74,6 +76,11 @@ public abstract class ValueAtom<T> : Atom
             "#f" => new BoolAtom(false),
             _ => new SymbolAtom(new Symbol(str))
         };
+    }
+
+    public bool Compare(object compareWith)
+    {
+        return Value as object == compareWith;
     }
 
     public override Expression Evaluate(IEnvironment environment)

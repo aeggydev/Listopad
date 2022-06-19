@@ -11,6 +11,8 @@ public abstract class Native : Atom
         return Run(environment, args);
     }
 
+    public override object ToCompare => this;
+
     protected abstract Expression Run(IEnvironment environment, Cons args);
 
     public override string GetString()
@@ -155,10 +157,7 @@ public class Eq : Native
             throw new Exception("eq requires arguments to be atoms");
         
         // TODO: Implement comparing values in classes
-        return atom1.UncheckedAs<ValueAtom<object>>().Value
-            .Equals(atom2.UncheckedAs<ValueAtom<object>>().Value)
-            ? new BoolAtom(true)
-            : new BoolAtom(false);
+        return new BoolAtom(atom1.ToCompare.Equals(atom2.ToCompare));
     }
 }
 

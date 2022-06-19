@@ -63,10 +63,13 @@ public class InterpreterTests
     [Fact]
     public void Eq1()
     {
-        const string code = @"(eq 1 1)";
+        const string code1 = @"(eq 1 1)";
+        const string code2 = @"(eq ""foo"" ""bar"")";
         Interpreter interpreter = new();
-        var expression = interpreter.ReadAndEvalute(code);
-        Assert.True(expression.As<BoolAtom>().Value);
+        Assert.True(interpreter.ReadAndEvalute(code1)
+            .As<BoolAtom>().Value);
+        Assert.False(interpreter.ReadAndEvalute(code2)
+            .As<BoolAtom>().Value);
     }
 
     [Fact]

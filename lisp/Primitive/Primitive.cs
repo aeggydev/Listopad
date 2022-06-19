@@ -5,6 +5,7 @@ public abstract class Expression
     public abstract Expression Evaluate(IEnvironment environment);
 
     public abstract string GetString();
+    public abstract object ToCompare { get; }
 
     public T As<T>() where T : Expression
     {

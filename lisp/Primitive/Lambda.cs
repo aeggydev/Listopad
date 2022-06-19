@@ -8,6 +8,8 @@ public class Lambda : Atom
     private readonly List<string> _parameters;
     private readonly Cons _body;
 
+    public override object ToCompare => this;
+
     public Lambda(IEnvironment environment, Cons args, Cons body)
     {
         _environment = environment;
