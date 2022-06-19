@@ -362,3 +362,47 @@ public class Not : Native
         };
     }
 }
+
+public class BiggerThan : Native
+{
+    protected override Expression Run(IEnvironment environment, Cons args)
+    {
+        var evaluted = args
+            .Select(x => x.Evaluate(environment))
+            .ToList();
+        return (int)(evaluted[0] as Atom).Value > (int)(evaluted[1] as Atom).Value
+            ? new Atom(true)
+            : new Atom(false);
+    }
+}
+
+public class Mapcar : Native
+{
+    protected override Expression Run(IEnvironment environment, Cons args)
+    {
+        var lambda = args.Car.Evaluate(environment) as Lambda;
+        var list = (args.Cdr as Cons).Car.Evaluate(environment) as Cons;
+
+        List<Expression> results = new();
+        foreach (var item in list)
+        {
+            results.Add(lambda.Run(environment, new Cons {Car = item, Cdr = null}));
+        }
+
+        return Cons.FromIEnumerable(results);
+    }
+}
+
+public class Multiply : Native
+{
+    protected override Expression Run(IEnvironment environment, Cons args)
+    {
+        var accumulator = (int)(args.Car as Atom).Value;
+        foreach (var item in args.Cdr as Cons)
+        {
+            accumulator *= (int)(item as Atom).Value;
+        }
+
+        return new Atom(accumulator);
+    }
+}

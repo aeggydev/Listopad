@@ -95,6 +95,9 @@ public class Interpreter
     {
         _environment.Set("+", new Plus());
         _environment.Set("-", new Minus());
+        _environment.Set("*", new Multiply());
+        _environment.Set(">", new BiggerThan());
+        
         _environment.Set("car", new Car());
         _environment.Set("cdr", new Cdr());
         _environment.Set("quote", new Quote());
@@ -106,6 +109,8 @@ public class Interpreter
         _environment.Set("apply", new ApplyFunc());
         _environment.Set("exit", new Exit());
         _environment.Set("debug", new Debug());
+
+        _environment.Set("mapcar", new Mapcar());
 
         _environment.Set("eq", new Eq());
         _environment.Set("and", new And());
@@ -140,5 +145,8 @@ public class Interpreter
     private const string Prelude = @"
 (begin
   (define inc (lambda (x) (+ x 1)))
-  (define dec (lambda (x) (- x 1))))";
+  (define dec (lambda (x) (- x 1)))
+  (define < (lambda (x y) (if (eq x y) #f (not (> x y)))))
+  (define toggle-debug (lambda (none) (print ""hi"") (define *debug-on-exception* (not *debug-on-exception*)))))"; 
+    // TODO: This lambda should require no argument
 }
