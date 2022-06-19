@@ -13,7 +13,7 @@ public class Lambda : Expression
 
         var argList = args.ToList();
         Arity = argList.Count;
-        _parameters = argList.Select(x => (x as Atom).Value as string).ToList();
+        _parameters = argList.Select(x => (x as ValueAtom).Value as string).ToList();
 
         _body = body;
     }

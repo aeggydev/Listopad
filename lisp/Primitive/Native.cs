@@ -41,12 +41,12 @@ public class Plus : Native
         var sum = 0;
         foreach (var arg in argList)
         {
-            if (arg is not Atom atom) throw new Exception("+ requires arguments to be atoms");
+            if (arg is not ValueAtom atom) throw new Exception("+ requires arguments to be atoms");
             if (atom.Type is not AtomTypes.Integer) throw new Exception("Arguments not integer");
             sum += (int)atom.Value;
         }
 
-        return new Atom(sum, AtomTypes.Integer);
+        return new ValueAtom(sum, AtomTypes.Integer);
     }
 }
 
@@ -57,36 +57,36 @@ public class Minus : Native
         var argList = args
             .Select(x => x.Evaluate(environment))
             .ToList();
-        if (argList.Any(x => x is not Atom { Type: AtomTypes.Integer or AtomTypes.Float }))
+        if (argList.Any(x => x is not ValueAtom { Type: AtomTypes.Integer or AtomTypes.Float }))
             throw new Exception("Arguments are not numbers");
 
         if (argList.Count == 0) throw new Exception("- requires at least one argument");
         if (argList.Count == 1)
         {
-            if (argList.First() is not Atom { Type: AtomTypes.Integer or AtomTypes.Float } numAtom)
+            if (argList.First() is not ValueAtom { Type: AtomTypes.Integer or AtomTypes.Float } numAtom)
                 throw new Exception("Argument is not an atom");
             switch (numAtom.Value)
             {
                 case int intAtom:
-                    return new Atom(-intAtom as object, AtomTypes.Integer);
+                    return new ValueAtom(-intAtom as object, AtomTypes.Integer);
                 case float floatAtom:
-                    return new Atom(-floatAtom as object, AtomTypes.Float);
+                    return new ValueAtom(-floatAtom as object, AtomTypes.Float);
             }
         }
 
         // TODO: Don't use floats if not needed
-        var first = argList.First().As<Atom>();
-        var rest = argList.Skip(1).Cast<Atom>();
+        var first = argList.First().As<ValueAtom>();
+        var rest = argList.Skip(1).Cast<ValueAtom>();
         var sum = Convert.ToSingle(first.Value);
         foreach (var atom in rest)
         {
             sum -= Convert.ToSingle(atom.Value);
         }
 
-        var atomType = argList.Any(x => x is Atom { Type: AtomTypes.Float }) 
+        var atomType = argList.Any(x => x is ValueAtom { Type: AtomTypes.Float }) 
             ? AtomTypes.Float 
             : AtomTypes.Integer;
-        return new Atom(sum, atomType);
+        return new ValueAtom(sum, atomType);
     }
 }
 
@@ -134,7 +134,7 @@ public class Exit : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var exitNumber = args.Car?.Evaluate(environment) is Atom { Type: AtomTypes.Integer } atom
+        var exitNumber = args.Car?.Evaluate(environment) is ValueAtom { Type: AtomTypes.Integer } atom
             ? (int)atom.Value
             : 0;
         System.Environment.Exit(exitNumber);
@@ -151,11 +151,11 @@ public class Eq : Native
             .Select(x => x.Evaluate(environment))
             .ToList();
         if (argList.Count != 2) throw new Exception("eq requires exactly two arguments");
-        if (argList[0] is not Atom atom1 || argList[1] is not Atom atom2)
+        if (argList[0] is not ValueAtom atom1 || argList[1] is not ValueAtom atom2)
             throw new Exception("eq requires arguments to be atoms");
         return atom1.Value.Equals(atom2.Value)
-            ? new Atom(true as object, AtomTypes.Boolean)
-            : new Atom(false as object, AtomTypes.Boolean);
+            ? new ValueAtom(true as object, AtomTypes.Boolean)
+            : new ValueAtom(false as object, AtomTypes.Boolean);
     }
 }
 
@@ -170,7 +170,7 @@ public class And : Native
 
         foreach (var item in argList)
         {
-            if (item is Atom { Type: AtomTypes.Boolean } atom && atom.GetValue<bool>() == false)
+            if (item is ValueAtom { Type: AtomTypes.Boolean } atom && atom.GetValue<bool>() == false)
             {
                 return atom;
             }
@@ -191,13 +191,13 @@ public class Or : Native
 
         foreach (var item in argList)
         {
-            if (item is not Atom { Type: AtomTypes.Boolean } atom || atom.GetValue<bool>())
+            if (item is not ValueAtom { Type: AtomTypes.Boolean } atom || atom.GetValue<bool>())
             {
                 return item;
             }
         }
 
-        return new Atom(false);
+        return new ValueAtom(false);
     }
 }
 
@@ -209,7 +209,7 @@ public class If : Native
         var argList = args.ToList();
         if (argList.Count != 3) throw new Exception("if requires exactly three arguments");
         var predicate = argList.First().Evaluate(environment);
-        var isFalse = predicate is Atom { Type: AtomTypes.Boolean } predicateAtom && predicateAtom.GetValue<bool>() == false;
+        var isFalse = predicate is ValueAtom { Type: AtomTypes.Boolean } predicateAtom && predicateAtom.GetValue<bool>() == false;
         
         return isFalse
             ? argList.Last().Evaluate(environment)
@@ -225,7 +225,7 @@ public class Define : Native
         if (argList.Count != 2) throw new Exception("define requires exactly two arguments");
 
         var name = argList.First();
-        if (name is not Atom { Type: AtomTypes.Symbol } nameAtom)
+        if (name is not ValueAtom { Type: AtomTypes.Symbol } nameAtom)
             throw new Exception("define requires name to be a symbol");
 
         var value = argList.Last().Evaluate(environment);
@@ -241,12 +241,12 @@ public class Debug : Native
         if (!Debugger.IsAttached)
         {
             Console.WriteLine("Debugger isn't attached");
-            return new Atom(false);
+            return new ValueAtom(false);
             // TODO: Return nothing and make IsAttached into a computed variable
         }
 
         Debugger.Break();
-        return new Atom(true);
+        return new ValueAtom(true);
     }
 }
 
@@ -309,7 +309,7 @@ public class AtomP : Native
     protected override Expression Run(IEnvironment environment, Cons args)
     {
         var value = args.Car?.Evaluate(environment);
-        return new Atom(value is Atom or Cons { IsList: false } as object, AtomTypes.Boolean);
+        return new ValueAtom(value is ValueAtom or Cons { IsList: false } as object, AtomTypes.Boolean);
     }
 }
 
@@ -337,7 +337,7 @@ public class Print : Native
         var text = args.Car?.Evaluate(environment);
         switch (text)
         {
-            case Atom {Type:AtomTypes.String} atomString:
+            case ValueAtom {Type:AtomTypes.String} atomString:
                 Console.WriteLine(atomString.GetValue<string>());
                 break;
             default:
@@ -345,7 +345,7 @@ public class Print : Native
                 break;
         }
 
-        return new Atom(0);
+        return new ValueAtom(0);
         // Should return nil
     }
 }
@@ -357,7 +357,7 @@ public class Not : Native
         var value = args.Car?.Evaluate(environment);
         return value switch
         {
-            Atom { Type: AtomTypes.Boolean } boolAtom => new Atom(!boolAtom.GetValue<bool>()),
+            ValueAtom { Type: AtomTypes.Boolean } boolAtom => new ValueAtom(!boolAtom.GetValue<bool>()),
             _ => throw new Exception("Input must be atom")
         };
     }
@@ -370,9 +370,9 @@ public class BiggerThan : Native
         var evaluted = args
             .Select(x => x.Evaluate(environment))
             .ToList();
-        return evaluted[0].As<Atom>().GetValue<int>() > evaluted[1].As<Atom>().GetValue<int>()
-            ? new Atom(true)
-            : new Atom(false);
+        return evaluted[0].As<ValueAtom>().GetValue<int>() > evaluted[1].As<ValueAtom>().GetValue<int>()
+            ? new ValueAtom(true)
+            : new ValueAtom(false);
     }
 }
 
@@ -397,12 +397,12 @@ public class Multiply : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var accumulator = args.Car.As<Atom>().GetValue<int>();
+        var accumulator = args.Car.As<ValueAtom>().GetValue<int>();
         foreach (var item in args.Cdr.As<Cons>())
         {
-            accumulator *= item.As<Atom>().GetValue<int>();
+            accumulator *= item.As<ValueAtom>().GetValue<int>();
         }
 
-        return new Atom(accumulator);
+        return new ValueAtom(accumulator);
     }
 }

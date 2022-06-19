@@ -91,9 +91,9 @@ public static class Reader
             case AtomToken atomToken:
                 if (tokens.Any() && topLevel)
                     throw new Exception("Trailing garbage following expression");
-                return Atom.ParseString(atomToken.Name);
+                return ValueAtom.ParseString(atomToken.Name);
             case StringAtomToken stringAtomToken:
-                return new Atom(stringAtomToken.Content);
+                return new ValueAtom(stringAtomToken.Content);
             case OpeningParenToken:
                 List<Expression> expList = new();
                 while (tokens.First() is not ClosingParenToken)
@@ -108,7 +108,7 @@ public static class Reader
             case QuoteToken:
                 var quoted = ParseTokens(tokens);
                 return new Cons { Car = quoted }.
-                    Wrap(new Atom("quote", AtomTypes.Symbol));
+                    Wrap(new ValueAtom("quote", AtomTypes.Symbol));
             case BackquoteToken:
                 var quoted2 = ParseTokens(tokens);
                 
@@ -117,7 +117,7 @@ public static class Reader
                 if (quoted2 is not Cons)
                     return new Cons
                     {
-                        Car = new Atom("quote", AtomTypes.Symbol),
+                        Car = new ValueAtom("quote", AtomTypes.Symbol),
                         Cdr = new Cons{Car = quoted2}
                     };
             case NilToken:

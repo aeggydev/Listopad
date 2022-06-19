@@ -13,7 +13,7 @@ public class Cons : Expression, IEnumerable<Expression>
         var expression = Car switch
         {
             Cons consCar => consCar.Evaluate(environment),
-            Atom { Type: AtomTypes.Symbol } atomCar => environment.Get(atomCar.GetValue<string>()),
+            ValueAtom { Type: AtomTypes.Symbol } atomCar => environment.Get(atomCar.GetValue<string>()),
             Lambda => Car,
             Native => Car,
             _ => throw new Exception("Illegal function call")

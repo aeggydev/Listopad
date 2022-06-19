@@ -128,7 +128,7 @@ public class Interpreter
 
         _environment.Set("atomp", new AtomP());
 
-        _environment.Set("*debug-on-exception*", new Atom(true));
+        _environment.Set("*debug-on-exception*", new ValueAtom(true));
 
         ReadAndEvalute(Prelude);
     }

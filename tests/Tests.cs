@@ -15,11 +15,11 @@ public class InterpreterTests
         const string code = @"(+  1  2 3    4 (+ 1 2 5 ) 3  )";
         var data = Reader.ReadFromString(code).As<Cons>();
         Assert.Equal(7, data.Count());
-        Assert.Equal(new Atom(2).Value, data[5]?.As<Cons>()[2]?.As<Atom>().Value);
+        Assert.Equal(new ValueAtom(2).Value, data[5]?.As<Cons>()[2]?.As<ValueAtom>().Value);
 
         Interpreter interpreter = new();
         var result = interpreter.Evaluate(data);
-        Assert.Equal(21 as object, result.As<Atom>().Value);
+        Assert.Equal(21 as object, result.As<ValueAtom>().Value);
     }
 
     [Fact]
@@ -27,10 +27,10 @@ public class InterpreterTests
     {
         const string code = @"(begin (define foobar (lambda (lol) (inc (inc lol)))) (foobar 60))";
         var data = Reader.ReadFromString(code) as Cons;
-        Assert.Equal("define", data?[1]?.As<Cons>()[0]?.As<Atom>().Value);
+        Assert.Equal("define", data?[1]?.As<Cons>()[0]?.As<ValueAtom>().Value);
 
         Interpreter interpreter = new();
-        Assert.Equal(62 as object, interpreter.Evaluate(data).As<Atom>().Value);
+        Assert.Equal(62 as object, interpreter.Evaluate(data).As<ValueAtom>().Value);
     }
 
     [Fact]
