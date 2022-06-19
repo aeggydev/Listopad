@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using lisp;
 using lisp.Reader;
@@ -29,5 +30,21 @@ public class InterpreterTests
 
         Interpreter interpreter = new();
         Assert.Equal(62 as object, (interpreter.Evaluate(data) as Atom).Value);
+    }
+
+    [Fact]
+    public void TrailingGarbageTest1()
+    {
+        const string code = @"5 (+ 1 1)";
+        Interpreter interpreter = new();
+        Assert.Throws<Exception>(() => interpreter.ReadAndEvalute(code));
+    }
+    
+    [Fact]
+    public void TrailingGarbageTest2()
+    {
+        const string code = @"(+ 1 1) 5";
+        Interpreter interpreter = new();
+        Assert.Throws<Exception>(() => interpreter.ReadAndEvalute(code));
     }
 }

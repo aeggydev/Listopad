@@ -47,6 +47,7 @@ public static class Reader
                         stringContent.Append(currentChar);
                         currentChar = str[++i];
                     } while (currentChar != '"');
+
                     tokens.Add(new StringAtomToken(stringContent.ToString()));
                     break;
                 case ' ' or '\r' or '\n':
@@ -57,7 +58,8 @@ public static class Reader
                     StringBuilder symbolContent = new();
                     char currentChar2 = str[i];
                     var isOutOfBounds = false;
-                    while (!isOutOfBounds && currentChar2 is not ' ' and not ')' and not '"' and not '\r' and not '\n'){
+                    while (!isOutOfBounds && currentChar2 is not ' ' and not ')' and not '"' and not '\r' and not '\n')
+                    {
                         symbolContent.Append(currentChar2);
                         isOutOfBounds = ++i >= str.Length;
                         currentChar2 = !isOutOfBounds ? str[i] : ' ';
@@ -72,13 +74,15 @@ public static class Reader
         return tokens;
     }
 
-    private static Expression ParseTokens(List<Token> tokens)
+    private static Expression ParseTokens(List<Token> tokens, bool topLevel = false)
     {
         var token = tokens.Pop();
 
         switch (token)
         {
             case AtomToken atomToken:
+                if (tokens.Any() && topLevel)
+                    throw new Exception("Trailing garbage following expression");
                 return Atom.ParseString(atomToken.Name);
             case StringAtomToken stringAtomToken:
                 return new Atom(stringAtomToken.Content);
@@ -87,14 +91,18 @@ public static class Reader
                 while (tokens.First() is not ClosingParenToken)
                     expList.Add(ParseTokens(tokens));
                 tokens.Pop();
+
+                if (tokens.Any() && topLevel)
+                    throw new Exception("Trailing garbage following expression");
                 return Cons.FromIEnumerable(expList);
             case ClosingParenToken:
                 throw new Exception("Unexpected ')'");
             case QuoteToken:
                 var quoted = ParseTokens(tokens);
-                return new Cons {
+                return new Cons
+                {
                     Car = new Atom("quote", AtomTypes.Symbol),
-                    Cdr = new Cons {Car = quoted} 
+                    Cdr = new Cons { Car = quoted }
                 };
             case NilToken:
                 throw new NotImplementedException();
@@ -108,7 +116,7 @@ public static class Reader
         var tokens = Tokenize(str)
             .Where(x => x is not WhitespaceToken)
             .ToList();
-        var parsed = ParseTokens(tokens);
+        var parsed = ParseTokens(tokens, true);
         return parsed;
     }
 }
