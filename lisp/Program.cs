@@ -2,14 +2,30 @@
 using lisp.Reader;
 
 Interpreter interpreter = new();
-while (true) {
+while (true)
+{
     Console.Write("> ");
-    var code = Console.ReadLine().TrimEnd();
-    var read = Reader.ReadFromString(code);
-    var returnValue = interpreter.Evaluate(read);
-    
-    Console.WriteLine(returnValue.GetString());
-    //Console.WriteLine(returnValue is Atom atom ? atom.Value : $"DATA OF TYPE: {returnValue.GetType().Name}");
-    // TODO: Replace with prin1
-    Console.WriteLine();
+    try
+    {
+        var code = Console.ReadLine().TrimEnd();
+        var read = Reader.ReadFromString(code);
+        var returnValue = interpreter.Evaluate(read);
+
+        Console.WriteLine(returnValue.GetString());
+        Console.WriteLine();
+    }
+    catch (Exception e)
+    {
+        var atom = interpreter._environment.Get("*debug-on-exception*") as Atom;
+        var debug = (bool)atom.Value;
+        switch (debug)
+        {
+            case true:
+                // TODO: It debugs either way
+                break;
+            case false:
+                Console.WriteLine($"Error: {e.Message}\n{e.StackTrace}");
+                break;
+        }
+    }
 }

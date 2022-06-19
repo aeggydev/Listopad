@@ -47,4 +47,64 @@ public class InterpreterTests
         Interpreter interpreter = new();
         Assert.Throws<Exception>(() => interpreter.ReadAndEvalute(code));
     }
+
+    [Fact]
+    public void ConsTest1()
+    {
+        const string code = @"(cons 1 (cons 2 3))";
+        Interpreter interpreter = new();
+        Cons cons = null;
+        var exception = Record.Exception(() => cons = interpreter.ReadAndEvalute(code) as Cons);
+        Assert.Null(exception);
+        Assert.Equal(3, cons.Count());
+    }
+
+    [Fact]
+    public void Concat1()
+    {
+        const string code = @"(concat '(1 2) '(3 4))";
+        Interpreter interpreter = new();
+
+        var expression = interpreter.ReadAndEvalute(code);
+        Assert.Equal(4, (expression as Cons).Count());
+    }
+    
+    [Fact]
+    public void Concat2()
+    {
+        const string code = @"(concat '(1 2) '(3 4) '(5 6))";
+        Interpreter interpreter = new();
+
+        var expression = interpreter.ReadAndEvalute(code);
+        Assert.Equal(6, (expression as Cons).Count());
+    }
+
+    [Fact]
+    public void Backquote1()
+    {
+        const string code = @"`(1 1)";
+        Interpreter interpreter = new();
+        var expression = interpreter.ReadAndEvalute(code) as Cons;
+        Assert.Equal(2, expression.Count());
+    }
+    
+    [Fact]
+    public void Backquote2()
+    {
+        const string code = @"`(1 ~(list 2 3 4))";
+        Interpreter interpreter = new();
+        var expression = interpreter.ReadAndEvalute(code) as Cons;
+        Assert.Equal(2, expression.Count());
+        Assert.Equal(3, (expression.Last() as Cons).Count());
+    }
+    
+    
+    [Fact]
+    public void Backquote3()
+    {
+        const string code = @"`(1 ~@(list 2 3 4))";
+        Interpreter interpreter = new();
+        var expression = interpreter.ReadAndEvalute(code) as Cons;
+        Assert.Equal(4, expression.Count());
+    }
 }

@@ -89,7 +89,7 @@ public class Environment : IEnvironment
 
 public class Interpreter
 {
-    private readonly Environment _environment = new();
+    public readonly Environment _environment = new();
 
     public Interpreter()
     {
@@ -101,22 +101,27 @@ public class Interpreter
         _environment.Set("cons", new ConsFunc());
         _environment.Set("eval", new Eval());
         _environment.Set("list", new ListFunc());
+        _environment.Set("concat", new Concat());
         _environment.Set("begin", new BeginFunc());
         _environment.Set("apply", new ApplyFunc());
-        
         _environment.Set("exit", new Exit());
         _environment.Set("debug", new Debug());
 
         _environment.Set("eq", new Eq());
         _environment.Set("and", new And());
         _environment.Set("or", new Or());
+        _environment.Set("not", new Not());
+
+        _environment.Set("print", new Print());
+        
         _environment.Set("if", new If());
-        _environment.Set("pi", new Atom(314 as object, AtomTypes.Integer));
 
         _environment.Set("define", new Define());
         _environment.Set("lambda", new LambdaFunc());
 
         _environment.Set("atomp", new AtomP());
+
+        _environment.Set("*debug-on-exception*", new Atom(true));
 
         ReadAndEvalute(Prelude);
     }

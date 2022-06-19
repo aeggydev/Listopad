@@ -9,7 +9,11 @@ public record OpeningParenToken : Token;
 public record ClosingParenToken : Token;
 
 public record QuoteToken : Token;
-// TODO: Implement backquotes
+
+public record BackquoteToken : Token;
+
+public record TildeToken : Token;
+public record AtToken : Token;
 
 public record NilToken : Token;
 
@@ -37,6 +41,9 @@ public static class Reader
                     break;
                 case '\'':
                     tokens.Add(new QuoteToken());
+                    break;
+                case '`':
+                    tokens.Add(new BackquoteToken());
                     break;
                 case '"':
                     StringBuilder stringContent = new();
@@ -104,6 +111,17 @@ public static class Reader
                     Car = new Atom("quote", AtomTypes.Symbol),
                     Cdr = new Cons { Car = quoted }
                 };
+            case BackquoteToken:
+                var quoted2 = ParseTokens(tokens);
+                
+                throw new NotImplementedException();
+                // TODO: DRY this
+                if (quoted2 is not Cons)
+                    return new Cons
+                    {
+                        Car = new Atom("quote", AtomTypes.Symbol),
+                        Cdr = new Cons{Car = quoted2}
+                    };
             case NilToken:
                 throw new NotImplementedException();
             default:

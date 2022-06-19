@@ -312,3 +312,53 @@ public class AtomP : Native
         return new Atom(value is Atom or Cons { IsList: false } as object, AtomTypes.Boolean);
     }
 }
+
+public class Concat : Native
+{
+    protected override Expression Run(IEnvironment environment, Cons args)
+    {
+        var argList = args
+            .Select(x => x.Evaluate(environment))
+            .ToList();
+        var accumulator = argList.First() as Cons;
+        foreach (var item in argList.Skip(1))
+        {
+            accumulator = Cons.FromIEnumerable(accumulator.Concat(item as Cons));
+        }
+
+        return accumulator;
+    }
+}
+
+public class Print : Native
+{
+    protected override Expression Run(IEnvironment environment, Cons args)
+    {
+        var text = args.Car.Evaluate(environment);
+        switch (text)
+        {
+            case Atom {Type:AtomTypes.String} atomString:
+                Console.WriteLine(atomString.Value as string);
+                break;
+            default:
+                Console.WriteLine(text.GetString());
+                break;
+        }
+
+        return new Atom(0);
+        // Should return nil
+    }
+}
+
+public class Not : Native
+{
+    protected override Expression Run(IEnvironment environment, Cons args)
+    {
+        var value = args.Car.Evaluate(environment);
+        return value switch
+        {
+            Atom { Type: AtomTypes.Boolean } boolAtom => new Atom(!(bool)boolAtom.Value),
+            _ => throw new Exception("Input must be atom")
+        };
+    }
+}
