@@ -7,7 +7,7 @@ public abstract class Native : Expression
 {
     public override Expression Evaluate(IEnvironment environment)
     {
-        var args = environment.Get("*ARGS*") as Cons;
+        var args = environment.Get("*ARGS*").As<Cons>();
         return Run(environment, args);
     }
 
@@ -24,7 +24,7 @@ public class Car : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var arg = args.Car.Evaluate(environment);
+        var arg = args.Car?.Evaluate(environment);
         if (arg is not Cons cons) throw new Exception("car requires a list");
         return cons.Car;
     }
@@ -75,7 +75,7 @@ public class Minus : Native
         }
 
         // TODO: Don't use floats if not needed
-        var first = argList.First() as Atom;
+        var first = argList.First().As<Atom>();
         var rest = argList.Skip(1).Cast<Atom>();
         var sum = Convert.ToSingle(first.Value);
         foreach (var atom in rest)
@@ -94,7 +94,7 @@ public class Cdr : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var arg = args.Car.Evaluate(environment);
+        var arg = args.Car?.Evaluate(environment);
         if (arg is not Cons cons) throw new Exception("cdr requires a list");
         return cons.Cdr;
     }
@@ -134,7 +134,7 @@ public class Exit : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var exitNumber = args?.Car?.Evaluate(environment) is Atom { Type: AtomTypes.Integer } atom
+        var exitNumber = args.Car?.Evaluate(environment) is Atom { Type: AtomTypes.Integer } atom
             ? (int)atom.Value
             : 0;
         System.Environment.Exit(exitNumber);
@@ -170,7 +170,7 @@ public class And : Native
 
         foreach (var item in argList)
         {
-            if (item is Atom { Type: AtomTypes.Boolean } atom && (bool)atom.Value == false)
+            if (item is Atom { Type: AtomTypes.Boolean } atom && atom.GetValue<bool>() == false)
             {
                 return atom;
             }
@@ -191,13 +191,13 @@ public class Or : Native
 
         foreach (var item in argList)
         {
-            if (item is not Atom { Type: AtomTypes.Boolean } atom || (bool)atom.Value)
+            if (item is not Atom { Type: AtomTypes.Boolean } atom || atom.GetValue<bool>())
             {
                 return item;
             }
         }
 
-        return new Atom(false as object, AtomTypes.Boolean);
+        return new Atom(false);
     }
 }
 
@@ -209,7 +209,7 @@ public class If : Native
         var argList = args.ToList();
         if (argList.Count != 3) throw new Exception("if requires exactly three arguments");
         var predicate = argList.First().Evaluate(environment);
-        var isFalse = predicate is Atom { Type: AtomTypes.Boolean } predicateAtom && (bool)predicateAtom.Value == false;
+        var isFalse = predicate is Atom { Type: AtomTypes.Boolean } predicateAtom && predicateAtom.GetValue<bool>() == false;
         
         return isFalse
             ? argList.Last().Evaluate(environment)
@@ -229,7 +229,7 @@ public class Define : Native
             throw new Exception("define requires name to be a symbol");
 
         var value = argList.Last().Evaluate(environment);
-        environment.Set(nameAtom.Value as string, value);
+        environment.Set(nameAtom.GetValue<string>(), value);
         return value;
     }
 }
@@ -241,12 +241,12 @@ public class Debug : Native
         if (!Debugger.IsAttached)
         {
             Console.WriteLine("Debugger isn't attached");
-            return new Atom(false as object, AtomTypes.Boolean);
+            return new Atom(false);
             // TODO: Return nothing and make IsAttached into a computed variable
         }
 
         Debugger.Break();
-        return new Atom(true as object, AtomTypes.Boolean);
+        return new Atom(true);
     }
 }
 
@@ -297,7 +297,7 @@ public class ApplyFunc : Native
         var argList = args.ToList();
         if (argList.Count != 2) throw new Exception("apply requires two arguments");
 
-        var function = args.Car.Evaluate(environment);
+        var function = args.Car?.Evaluate(environment);
         var arguments = argList[1].Evaluate(environment);
 
         return new Cons { Car = function, Cdr = arguments }.Evaluate(environment);
@@ -308,7 +308,7 @@ public class AtomP : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var value = args.Car.Evaluate(environment);
+        var value = args.Car?.Evaluate(environment);
         return new Atom(value is Atom or Cons { IsList: false } as object, AtomTypes.Boolean);
     }
 }
@@ -320,10 +320,10 @@ public class Concat : Native
         var argList = args
             .Select(x => x.Evaluate(environment))
             .ToList();
-        var accumulator = argList.First() as Cons;
+        var accumulator = argList.First().As<Cons>();
         foreach (var item in argList.Skip(1))
         {
-            accumulator = Cons.FromIEnumerable(accumulator.Concat(item as Cons));
+            accumulator = Cons.FromIEnumerable(accumulator.Concat(item.As<Cons>()));
         }
 
         return accumulator;
@@ -334,14 +334,14 @@ public class Print : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var text = args.Car.Evaluate(environment);
+        var text = args.Car?.Evaluate(environment);
         switch (text)
         {
             case Atom {Type:AtomTypes.String} atomString:
-                Console.WriteLine(atomString.Value as string);
+                Console.WriteLine(atomString.GetValue<string>());
                 break;
             default:
-                Console.WriteLine(text.GetString());
+                Console.WriteLine(text?.GetString());
                 break;
         }
 
@@ -354,10 +354,10 @@ public class Not : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var value = args.Car.Evaluate(environment);
+        var value = args.Car?.Evaluate(environment);
         return value switch
         {
-            Atom { Type: AtomTypes.Boolean } boolAtom => new Atom(!(bool)boolAtom.Value),
+            Atom { Type: AtomTypes.Boolean } boolAtom => new Atom(!boolAtom.GetValue<bool>()),
             _ => throw new Exception("Input must be atom")
         };
     }
@@ -370,7 +370,7 @@ public class BiggerThan : Native
         var evaluted = args
             .Select(x => x.Evaluate(environment))
             .ToList();
-        return (int)(evaluted[0] as Atom).Value > (int)(evaluted[1] as Atom).Value
+        return evaluted[0].As<Atom>().GetValue<int>() > evaluted[1].As<Atom>().GetValue<int>()
             ? new Atom(true)
             : new Atom(false);
     }
@@ -380,8 +380,8 @@ public class Mapcar : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var lambda = args.Car.Evaluate(environment) as Lambda;
-        var list = (args.Cdr as Cons).Car.Evaluate(environment) as Cons;
+        var lambda = args.Car?.Evaluate(environment) as Lambda;
+        var list = args.Cdr?.As<Cons>().Car?.Evaluate(environment).As<Cons>();
 
         List<Expression> results = new();
         foreach (var item in list)
@@ -397,10 +397,10 @@ public class Multiply : Native
 {
     protected override Expression Run(IEnvironment environment, Cons args)
     {
-        var accumulator = (int)(args.Car as Atom).Value;
-        foreach (var item in args.Cdr as Cons)
+        var accumulator = args.Car.As<Atom>().GetValue<int>();
+        foreach (var item in args.Cdr.As<Cons>())
         {
-            accumulator *= (int)(item as Atom).Value;
+            accumulator *= item.As<Atom>().GetValue<int>();
         }
 
         return new Atom(accumulator);

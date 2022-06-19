@@ -8,8 +8,20 @@ public abstract class Expression
     public abstract Expression Evaluate(IEnvironment environment);
 
     public abstract string GetString();
-    // public abstract string Princ();
-    // public override string ToString() => Prin1();
+
+    public T As<T>() where T : Expression
+    {
+        return this switch
+        {
+            T thisT => thisT,
+            _ => throw new Exception($"Expression is not {typeof(T).Name}")
+        };
+    }
+
+    public Cons Wrap(Expression wrapWith)
+    {
+        return new Cons { Car = wrapWith, Cdr = this };
+    }
 }
 
 public class Cons : Expression, IEnumerable<Expression>
@@ -23,7 +35,7 @@ public class Cons : Expression, IEnumerable<Expression>
         var expression = Car switch
         {
             Cons consCar => consCar.Evaluate(environment),
-            Atom { Type: AtomTypes.Symbol } atomCar => environment.Get(atomCar.Value as string),
+            Atom { Type: AtomTypes.Symbol } atomCar => environment.Get(atomCar.GetValue<string>()),
             Lambda => Car,
             Native => Car,
             _ => throw new Exception("Illegal function call")
@@ -46,7 +58,7 @@ public class Cons : Expression, IEnumerable<Expression>
 
     public override string GetString()
     {
-        if (Cdr is Cons or null) // Is a list
+        if (IsList) // Is a list
         {
             var strings = this.Select(x => x.GetString());
             return $"({string.Join(" ", strings)})";
@@ -112,6 +124,11 @@ public class Atom : Expression
 {
     private static readonly Regex _floatRegex = new(@"-?\d+\.\d+", RegexOptions.Compiled);
     private static readonly Regex _intRegex = new(@"-?\d+", RegexOptions.Compiled);
+
+    public T GetValue<T>()
+    {
+        return (T)Value;
+    }
 
     public Atom(object value, AtomTypes type)
     {

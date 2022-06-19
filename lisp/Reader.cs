@@ -106,11 +106,8 @@ public static class Reader
                 throw new Exception("Unexpected ')'");
             case QuoteToken:
                 var quoted = ParseTokens(tokens);
-                return new Cons
-                {
-                    Car = new Atom("quote", AtomTypes.Symbol),
-                    Cdr = new Cons { Car = quoted }
-                };
+                return new Cons { Car = quoted }.
+                    Wrap(new Atom("quote", AtomTypes.Symbol));
             case BackquoteToken:
                 var quoted2 = ParseTokens(tokens);
                 

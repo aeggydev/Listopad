@@ -16,8 +16,8 @@ while (true)
     }
     catch (Exception e)
     {
-        var atom = interpreter._environment.Get("*debug-on-exception*") as Atom;
-        var debug = (bool)atom.Value;
+        var atom = interpreter._environment.Get("*debug-on-exception*").As<Atom>();
+        var debug = atom.GetValue<bool>();
         switch (debug)
         {
             case true:

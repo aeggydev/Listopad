@@ -12,13 +12,13 @@ public class InterpreterTests
     public void ReaderTest1()
     {
         const string code = @"(+  1  2 3    4 (+ 1 2 5 ) 3  )";
-        var data = Reader.ReadFromString(code) as Cons;
+        var data = Reader.ReadFromString(code).As<Cons>();
         Assert.Equal(7, data.Count());
-        Assert.Equal(new Atom(2).Value, ((data[5] as Cons)[2] as Atom).Value);
+        Assert.Equal(new Atom(2).Value, data[5]?.As<Cons>()[2]?.As<Atom>().Value);
 
         Interpreter interpreter = new();
         var result = interpreter.Evaluate(data);
-        Assert.Equal(21 as object, (result as Atom).Value);
+        Assert.Equal(21 as object, result.As<Atom>().Value);
     }
 
     [Fact]
@@ -26,10 +26,10 @@ public class InterpreterTests
     {
         const string code = @"(begin (define foobar (lambda (lol) (inc (inc lol)))) (foobar 60))";
         var data = Reader.ReadFromString(code) as Cons;
-        Assert.Equal("define", ((data[1] as Cons)[0] as Atom).Value);
+        Assert.Equal("define", data?[1]?.As<Cons>()[0]?.As<Atom>().Value);
 
         Interpreter interpreter = new();
-        Assert.Equal(62 as object, (interpreter.Evaluate(data) as Atom).Value);
+        Assert.Equal(62 as object, interpreter.Evaluate(data).As<Atom>().Value);
     }
 
     [Fact]
@@ -54,9 +54,9 @@ public class InterpreterTests
         const string code = @"(cons 1 (cons 2 3))";
         Interpreter interpreter = new();
         Cons cons = null;
-        var exception = Record.Exception(() => cons = interpreter.ReadAndEvalute(code) as Cons);
+        var exception = Record.Exception(() => cons = interpreter.ReadAndEvalute(code).As<Cons>());
         Assert.Null(exception);
-        Assert.Equal(3, cons.Count());
+        Assert.Equal(3, cons?.Count());
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class InterpreterTests
         Interpreter interpreter = new();
 
         var expression = interpreter.ReadAndEvalute(code);
-        Assert.Equal(4, (expression as Cons).Count());
+        Assert.Equal(4, expression.As<Cons>().Count());
     }
     
     [Fact]
@@ -76,7 +76,7 @@ public class InterpreterTests
         Interpreter interpreter = new();
 
         var expression = interpreter.ReadAndEvalute(code);
-        Assert.Equal(6, (expression as Cons).Count());
+        Assert.Equal(6, expression.As<Cons>().Count());
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class InterpreterTests
     {
         const string code = @"`(1 1)";
         Interpreter interpreter = new();
-        var expression = interpreter.ReadAndEvalute(code) as Cons;
+        var expression = interpreter.ReadAndEvalute(code).As<Cons>();
         Assert.Equal(2, expression.Count());
     }
     
@@ -93,9 +93,9 @@ public class InterpreterTests
     {
         const string code = @"`(1 ~(list 2 3 4))";
         Interpreter interpreter = new();
-        var expression = interpreter.ReadAndEvalute(code) as Cons;
+        var expression = interpreter.ReadAndEvalute(code).As<Cons>();
         Assert.Equal(2, expression.Count());
-        Assert.Equal(3, (expression.Last() as Cons).Count());
+        Assert.Equal(3, expression.Last().As<Cons>().Count());
     }
     
     
@@ -104,7 +104,7 @@ public class InterpreterTests
     {
         const string code = @"`(1 ~@(list 2 3 4))";
         Interpreter interpreter = new();
-        var expression = interpreter.ReadAndEvalute(code) as Cons;
+        var expression = interpreter.ReadAndEvalute(code).As<Cons>();
         Assert.Equal(4, expression.Count());
     }
 }
