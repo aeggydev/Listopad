@@ -13,7 +13,7 @@ public abstract class Native : Expression
 
     protected abstract Expression Run(IEnvironment environment, Cons args);
 
-    public override string Prin1ToString()
+    public override string GetString()
     {
         return $"#<FUNCTION ({GetType().Name})>";
         // TODO: Make it more detailed
@@ -200,12 +200,10 @@ public class If : Native
         if (argList.Count != 3) throw new Exception("if requires exactly three arguments");
         var predicate = argList.First().Evaluate(environment);
         var isFalse = predicate is Atom { Type: AtomTypes.Boolean } predicateAtom && (bool)predicateAtom.Value == false;
-        if (isFalse)
-        {
-            argList.Last().Evaluate(environment);
-        }
-
-        return argList[1].Evaluate(environment);
+        
+        return isFalse
+            ? argList.Last().Evaluate(environment)
+            : argList[1].Evaluate(environment);
     }
 }
 
@@ -293,5 +291,14 @@ public class ApplyFunc : Native
         var arguments = argList[1].Evaluate(environment);
 
         return new Cons { Car = function, Cdr = arguments }.Evaluate(environment);
+    }
+}
+
+public class AtomP : Native
+{
+    protected override Expression Run(IEnvironment environment, Cons args)
+    {
+        var value = args.Car.Evaluate(environment);
+        return new Atom(value is Atom or Cons { IsList: false } as object, AtomTypes.Boolean);
     }
 }

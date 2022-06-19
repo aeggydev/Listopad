@@ -115,6 +115,8 @@ public class Interpreter
 
         _environment.Set("define", new Define());
         _environment.Set("lambda", new LambdaFunc());
+
+        _environment.Set("atomp", new AtomP());
         
         Evaluate(Reader.ReadFromString(Prelude));
     }

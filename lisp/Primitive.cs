@@ -1,20 +1,22 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections;
+using System.Text.RegularExpressions;
 
 namespace lisp;
 
 public abstract class Expression
 {
     public abstract Expression Evaluate(IEnvironment environment);
-    public abstract string Prin1ToString();
+    public abstract string GetString();
     // public abstract string Princ();
     // public override string ToString() => Prin1();
 }
 
 
-public class Cons : Expression
+public class Cons : Expression, IEnumerable<Expression>
 {
     public Expression? Car { get; set; }
     public Expression? Cdr { get; set; }
+    public bool IsList => Cdr is Cons or null;
 
     public override Expression Evaluate(IEnvironment environment)
     {
@@ -41,16 +43,16 @@ public class Cons : Expression
         throw new Exception("Don't know");
     }
 
-    public override string Prin1ToString()
+    public override string GetString()
     {
         if (Cdr is Cons or null) // Is a list
         {
-            var strings = ToIEnumerable().Select(x => x.Prin1ToString());
+            var strings = ToIEnumerable().Select(x => x.GetString());
             return $"({string.Join(" ", strings)})";
         }
         else // Is a pair
         {
-            return $"({Car.Prin1ToString()} . {Cdr.Prin1ToString()})";
+            return $"({Car.GetString()} . {Cdr.GetString()})";
         }
     }
 
@@ -89,6 +91,21 @@ public class Cons : Expression
     {
         car = Car;
         cdr = Cdr;
+    }
+
+    public IEnumerator<Expression> GetEnumerator()
+    {
+        var current = this;
+        while (current != null)
+        {
+            yield return current.Car;
+            current = (Cons)current.Cdr;
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
 
@@ -158,7 +175,7 @@ public class Atom : Expression
         };
     }
 
-    public override string Prin1ToString()
+    public override string GetString()
     {
         return this switch
         {
@@ -192,7 +209,7 @@ public class Lambda : Expression
         return this;
     }
 
-    public override string Prin1ToString()
+    public override string GetString()
     {
         return $"#<FUNCTION (LAMBDA ({string.Join(" ", _parameters)})) {{{GetHashCode()}}}>";
     }
