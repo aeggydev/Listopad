@@ -19,19 +19,17 @@ public class Cons : Expression, IEnumerable<Expression>
             _ => throw new Exception("Illegal function call")
         };
 
-        if (expression is Native native)
+        switch (expression)
         {
-            // TODO: Get rid of this ugly hack
-            environment.Set("*ARGS*", Cdr);
-            return native.Evaluate(environment);
+            case Native native:
+                // TODO: Get rid of this ugly hack
+                environment.Set("*ARGS*", Cdr);
+                return native.Evaluate(environment);
+            case Lambda lambda:
+                return lambda.Run(environment, Cdr as Cons);
+            default:
+                throw new Exception("Don't know");
         }
-
-        if (expression is Lambda lambda)
-        {
-            return lambda.Run(environment, Cdr as Cons);
-        }
-
-        throw new Exception("Don't know");
     }
 
     public override string GetString()

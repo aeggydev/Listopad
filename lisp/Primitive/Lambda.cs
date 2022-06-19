@@ -1,7 +1,7 @@
 ﻿namespace lisp.Primitive;
 
 // TODO: Should be atom
-public class Lambda : Expression
+public class Lambda : Atom
 {
     private readonly IEnvironment _environment;
     public int Arity { get; }

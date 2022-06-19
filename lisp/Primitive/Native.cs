@@ -3,7 +3,7 @@
 namespace lisp.Primitive;
 
 // TODO: Make this less verbose
-public abstract class Native : Expression
+public abstract class Native : Atom
 {
     public override Expression Evaluate(IEnvironment environment)
     {
@@ -153,6 +153,8 @@ public class Eq : Native
         // TODO: Implement comparing atoms
         if (argList[0] is not Atom atom1 || argList[1] is not Atom atom2)
             throw new Exception("eq requires arguments to be atoms");
+        
+        // TODO: Implement comparing values in classes
         return atom1.UncheckedAs<ValueAtom<object>>().Value
             .Equals(atom2.UncheckedAs<ValueAtom<object>>().Value)
             ? new BoolAtom(true)
