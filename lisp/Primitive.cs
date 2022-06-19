@@ -178,17 +178,12 @@ public class Atom : Expression
             return new Atom(val as object, AtomTypes.Integer);
         }
 
-        if (str == "#t")
+        return str switch
         {
-            return new Atom(true as object, AtomTypes.Boolean);
-        }
-
-        if (str == "#f")
-        {
-            return new Atom(false as object, AtomTypes.Boolean);
-        }
-
-        return new Atom(str, AtomTypes.Symbol);
+            "#t" => new Atom(true as object, AtomTypes.Boolean),
+            "#f" => new Atom(false as object, AtomTypes.Boolean),
+            _ => new Atom(str, AtomTypes.Symbol)
+        };
     }
 
     public override Expression Evaluate(IEnvironment environment)
