@@ -55,7 +55,7 @@ public class InterpreterTests
         const string code = @"(cons 1 (cons 2 3))";
         Interpreter interpreter = new();
         Cons cons = null;
-        var exception = Record.Exception(() => cons = interpreter.ReadAndEvalute(code).As<Cons>());
+        var exception = Record.Exception(() => cons = interpreter.ReadAndEvalute(code).AsCons());
         Assert.Null(exception);
         Assert.Equal(3, cons?.Count());
     }
@@ -99,6 +99,17 @@ public class InterpreterTests
         Interpreter interpreter = new();
         var expression = interpreter.ReadAndEvalute(code).As<Cons>();
         Assert.Equal(2, expression.Count());
+    }
+
+    [Fact]
+    public void Comment()
+    {
+        const string code = @"(+ 5 5) ; Adds 5 and 5 together";
+        Interpreter interpreter = new();
+        int result = 0;
+        var exception = Record.Exception(() => result = interpreter.ReadAndEvalute(code).AsValue<int>());
+        Assert.Null(exception);
+        Assert.Equal(10, result);
     }
     
     [Fact]

@@ -5,6 +5,7 @@ using lisp.Reader;
 Interpreter interpreter = new();
 while (true)
 {
+    // TODO: Make it accept multiple lines
     Console.Write("> ");
     try
     {
