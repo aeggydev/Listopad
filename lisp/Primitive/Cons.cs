@@ -74,7 +74,18 @@ public class Cons : Expression, IEnumerable<Expression>
         while (current != null)
         {
             yield return current.Car;
-            current = (Cons)current.Cdr;
+            switch (current.Cdr)
+            {
+                case Cons cdrCons:
+                    current = cdrCons;
+                    break;
+                case null:
+                    current = null;
+                    break;
+                default:
+                    yield return current.Cdr;
+                    yield break;
+            }
         }
     }
 
