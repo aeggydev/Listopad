@@ -1,16 +1,15 @@
 ﻿namespace lisp.Primitive;
 
-// TODO: Should be atom
 public class Lambda : IAtom
 {
     private readonly IEnvironment _environment;
     public int Arity { get; }
     private readonly List<string> _parameters;
-    private readonly Cons _body;
+    private readonly ISeq _body;
 
     public virtual object ToCompare => this;
 
-    public Lambda(IEnvironment environment, Cons args, Cons body)
+    public Lambda(IEnvironment environment, ISeq args, ISeq body)
     {
         _environment = environment;
 

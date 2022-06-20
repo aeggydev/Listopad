@@ -162,6 +162,12 @@ public static class Reader
                 return new StringAtom(stringAtomToken.Content);
             case OpeningParenToken:
                 List<IExpression> expList = new();
+                if (tokens.First() is ClosingParenToken)
+                {
+                    tokens.Pop();
+                    return new Nil();
+                }
+                
                 while (tokens.First() is not ClosingParenToken)
                     expList.Add(ParseTokens(tokens));
                 tokens.Pop();
@@ -173,6 +179,10 @@ public static class Reader
                 throw new Exception("Unexpected ')'");
             case QuoteToken:
                 var quoted = ParseTokens(tokens);
+
+                if (quoted is Nil nil)
+                    return nil;
+                
                 return new Cons { Car = quoted }
                     .Wrap(new SymbolAtom(new Symbol("quote")));
             case BackquoteToken:
@@ -187,7 +197,7 @@ public static class Reader
                 //         Cdr = new Cons{Car = quoted2}
                 //     };
             case NilToken:
-                throw new NotImplementedException();
+                return new Nil();
             default:
                 throw new ArgumentOutOfRangeException(nameof(token));
         }

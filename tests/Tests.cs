@@ -102,6 +102,21 @@ public class InterpreterTests
         Assert.Null(exception);
         Assert.Equal(10, result);
     }
+
+    [Fact]
+    public void Nil()
+    {
+        const string code1 = @"((lambda nil 12))";
+        const string code2 = @"((lambda () 12))";
+        const string code3 = @"((lambda '() 12))";
+        Interpreter interpreter = new();
+        var expression1 = interpreter.ReadAndEvalute(code1);
+        var expression2 = interpreter.ReadAndEvalute(code2);
+        var expression3 = interpreter.ReadAndEvalute(code3);
+        Assert.Equal(12, expression1.AsValue<int>());
+        Assert.Equal(12, expression2.AsValue<int>());
+        Assert.Equal(12, expression3.AsValue<int>());
+    }
     
     [Fact]
     public void Backquote1()

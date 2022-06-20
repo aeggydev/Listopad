@@ -4,10 +4,32 @@ namespace lisp.Primitive;
 
 public interface ISeq : IExpression, IEnumerable<IExpression> { }
 
+public record Nil : ISeq, IAtom
+{
+    public IExpression Evaluate(IEnvironment environment) => this;
+
+    public string GetString() => "NIL";
+
+    public object ToCompare => this;
+    public IEnumerator<IExpression> GetEnumerator()
+    {
+        yield break;
+    }
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+}
+
 public class Cons : ISeq
 {
+    private IExpression? _cdr;
     public IExpression? Car { get; set; }
-    public IExpression? Cdr { get; set; }
+
+    public IExpression? Cdr
+    {
+        get => _cdr ?? new Nil();
+        set => _cdr = value;
+    }
+
     public bool IsList => Cdr is Cons or null;
     public object ToCompare => this;
 
@@ -25,7 +47,6 @@ public class Cons : ISeq
         switch (expression)
         {
             case Native native:
-                // TODO: Get rid of this ugly hack
                 return native.Run(environment, Cdr as Cons);
             case Lambda lambda:
                 return lambda.Run(environment, Cdr as Cons);
@@ -61,8 +82,6 @@ public class Cons : ISeq
         return list;
     }
 
-    // TODO: Implement indexing
-
     // Enable deconstructing
     public void Deconstruct(out IExpression car, out IExpression cdr)
     {
@@ -81,7 +100,7 @@ public class Cons : ISeq
                 case Cons cdrCons:
                     current = cdrCons;
                     break;
-                case null:
+                case null or Nil:
                     current = null;
                     break;
                 default:

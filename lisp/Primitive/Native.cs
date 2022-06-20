@@ -256,9 +256,9 @@ public class LambdaFunc : Native
     {
         var closure = environment.Closure();
         var (car, cdr) = args;
-        if (car is not Cons argsCons)
+        if (car is not ISeq argsCons)
             throw new Exception("lambda requires a symbol as its first argument");
-        if (cdr is not Cons bodyCons)
+        if (cdr is not ISeq bodyCons)
             throw new Exception("lambda requires a list as its second argument");
 
         var lambda = new Lambda(closure, argsCons, bodyCons);

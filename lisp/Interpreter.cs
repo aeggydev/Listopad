@@ -142,6 +142,5 @@ public class Interpreter
   (define inc (lambda (x) (+ x 1)))
   (define dec (lambda (x) (- x 1)))
   (define < (lambda (x y) (if (eq x y) #f (not (> x y)))))
-  (define toggle-debug (lambda (none) (print ""hi"") (define *debug-on-exception* (not *debug-on-exception*)))))"; 
-    // TODO: This lambda should require no argument
+  (define toggle-debug (lambda () (print ""hi"") (define *debug-on-exception* (not *debug-on-exception*)))))"; 
 }

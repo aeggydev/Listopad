@@ -74,6 +74,7 @@ public abstract class ValueAtom<T> : IAtom
         {
             "#t" => new BoolAtom(true),
             "#f" => new BoolAtom(false),
+            "nil" => new Nil(),
             _ => new SymbolAtom(new Symbol(str))
         };
     }
