@@ -148,7 +148,7 @@ public static class Reader
         return tokens;
     }
 
-    private static Expression ParseTokens(List<Token> tokens, bool topLevel = false)
+    private static IExpression ParseTokens(List<Token> tokens, bool topLevel = false)
     {
         var token = tokens.Pop();
 
@@ -161,7 +161,7 @@ public static class Reader
             case StringAtomToken stringAtomToken:
                 return new StringAtom(stringAtomToken.Content);
             case OpeningParenToken:
-                List<Expression> expList = new();
+                List<IExpression> expList = new();
                 while (tokens.First() is not ClosingParenToken)
                     expList.Add(ParseTokens(tokens));
                 tokens.Pop();
@@ -193,7 +193,7 @@ public static class Reader
         }
     }
 
-    public static Expression ReadFromString(string str)
+    public static IExpression ReadFromString(string str)
     {
         var tokens = Tokenize(str)
             .Where(x => x is not WhitespaceToken)

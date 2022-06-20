@@ -4,9 +4,9 @@ namespace lisp;
 
 public interface IEnvironment
 {
-    Expression Get(string symbol);
-    Expression Set(string symbol, Expression value);
-    Expression SetGlobal(string symbol, Expression value);
+    IExpression Get(string symbol);
+    IExpression Set(string symbol, IExpression value);
+    IExpression SetGlobal(string symbol, IExpression value);
     
     void NewFrame();
     void PopFrame();
@@ -16,10 +16,10 @@ public interface IEnvironment
 
 public record Frame(int Level)
 {
-    public Dictionary<string, Expression> Variables { get; } = new();
+    public Dictionary<string, IExpression> Variables { get; } = new();
 
-    public Expression Get(string symbol) => Variables[symbol];
-    public Expression Set(string symbol, Expression value) => Variables[symbol] = value;
+    public IExpression Get(string symbol) => Variables[symbol];
+    public IExpression Set(string symbol, IExpression value) => Variables[symbol] = value;
     public bool Contains(string symbol) => Variables.ContainsKey(symbol);
 }
 public class Environment : IEnvironment
@@ -38,7 +38,7 @@ public class Environment : IEnvironment
         Stack = stack;
     }
         
-    public Expression Get(string symbol)
+    public IExpression Get(string symbol)
     {
         foreach (var frame in Stack)
         {
@@ -51,14 +51,14 @@ public class Environment : IEnvironment
         throw new Exception("Variable doesn't exist in scope");
     }
 
-    public Expression Set(string symbol, Expression value)
+    public IExpression Set(string symbol, IExpression value)
     {
         var frame = Stack.Peek();
         frame.Set(symbol, value);
         return frame.Get(symbol); // Is this necessary?
     }
 
-    public Expression SetGlobal(string symbol, Expression value)
+    public IExpression SetGlobal(string symbol, IExpression value)
     {
         _topFrame.Set(symbol, value);
         return _topFrame.Get(symbol);
@@ -126,13 +126,13 @@ public class Interpreter
         ReadAndEvalute(Prelude);
     }
 
-    public Expression Evaluate(Expression expression)
+    public IExpression Evaluate(IExpression expression)
     {
         var returnValue = expression.Evaluate(_environment);
         return returnValue;
     }
 
-    public Expression ReadAndEvalute(string code)
+    public IExpression ReadAndEvalute(string code)
     {
         return Evaluate(Reader.Reader.ReadFromString(code));
     }

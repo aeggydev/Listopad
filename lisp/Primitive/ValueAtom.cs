@@ -36,7 +36,7 @@ public class BoolAtom : ValueAtom<bool>
     public override string TypeString => "bool";
 }
 
-public abstract class ValueAtom<T> : Atom
+public abstract class ValueAtom<T> : IAtom
 {
     private static readonly Regex _floatRegex = new(@"-?\d+\.\d+", RegexOptions.Compiled);
     private static readonly Regex _intRegex = new(@"-?\d+", RegexOptions.Compiled);
@@ -46,7 +46,7 @@ public abstract class ValueAtom<T> : Atom
         return Value;
     }
 
-    public override object ToCompare => Value as object;
+    public object ToCompare => Value as object;
 
     protected ValueAtom(T value)
     {
@@ -56,7 +56,7 @@ public abstract class ValueAtom<T> : Atom
     public T Value { get; init; }
     public abstract string TypeString { get; }
 
-    public static Atom ParseString(string str)
+    public static IAtom ParseString(string str)
     {
         if (_floatRegex.IsMatch(str))
         {
@@ -83,7 +83,7 @@ public abstract class ValueAtom<T> : Atom
         return Value as object == compareWith;
     }
 
-    public override Expression Evaluate(IEnvironment environment)
+    public IExpression Evaluate(IEnvironment environment)
     {
         return this switch
         {
@@ -92,7 +92,7 @@ public abstract class ValueAtom<T> : Atom
         };
     }
 
-    public override string GetString()
+    public string GetString()
     {
         return this switch
         {

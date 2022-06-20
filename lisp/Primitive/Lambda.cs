@@ -1,14 +1,14 @@
 ﻿namespace lisp.Primitive;
 
 // TODO: Should be atom
-public class Lambda : Atom
+public class Lambda : IAtom
 {
     private readonly IEnvironment _environment;
     public int Arity { get; }
     private readonly List<string> _parameters;
     private readonly Cons _body;
 
-    public override object ToCompare => this;
+    public virtual object ToCompare => this;
 
     public Lambda(IEnvironment environment, Cons args, Cons body)
     {
@@ -22,17 +22,17 @@ public class Lambda : Atom
     }
     // TODO: Implement variadic functions
 
-    public override Expression Evaluate(IEnvironment environment)
+    public virtual IExpression Evaluate(IEnvironment environment)
     {
         return this;
     }
 
-    public override string GetString()
+    public virtual string GetString()
     {
         return $"#<FUNCTION (LAMBDA ({string.Join(" ", _parameters)})) {{{GetHashCode()}}}>";
     }
 
-    public Expression Run(IEnvironment environment, Cons? args)
+    public IExpression Run(IEnvironment environment, Cons? args)
     {
         var argList = args?
             .Select(x =>
@@ -56,7 +56,7 @@ public class Lambda : Atom
             _environment.Set(_parameters[i], argList![i]);
         }
 
-        Expression returnVal = null;
+        IExpression returnVal = null;
         foreach (var expression in _body)
         {
             returnVal = expression.Evaluate(_environment);

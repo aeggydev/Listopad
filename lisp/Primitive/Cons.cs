@@ -2,14 +2,16 @@
 
 namespace lisp.Primitive;
 
-public class Cons : Expression, IEnumerable<Expression>
-{
-    public Expression? Car { get; set; }
-    public Expression? Cdr { get; set; }
-    public bool IsList => Cdr is Cons or null;
-    public override object ToCompare => this;
+public interface ISeq : IExpression, IEnumerable<IExpression> { }
 
-    public override Expression Evaluate(IEnvironment environment)
+public class Cons : ISeq
+{
+    public IExpression? Car { get; set; }
+    public IExpression? Cdr { get; set; }
+    public bool IsList => Cdr is Cons or null;
+    public object ToCompare => this;
+
+    public IExpression Evaluate(IEnvironment environment)
     {
         var expression = Car switch
         {
@@ -32,7 +34,7 @@ public class Cons : Expression, IEnumerable<Expression>
         }
     }
 
-    public override string GetString()
+    public virtual string GetString()
     {
         if (IsList) // Is a list
         {
@@ -45,7 +47,7 @@ public class Cons : Expression, IEnumerable<Expression>
         }
     }
 
-    public static Cons FromIEnumerable(IEnumerable<Expression> enumerable)
+    public static Cons FromIEnumerable(IEnumerable<IExpression> enumerable)
     {
         var (car, cdr) = enumerable.Cons();
         var list = new Cons { Car = car };
@@ -62,13 +64,13 @@ public class Cons : Expression, IEnumerable<Expression>
     // TODO: Implement indexing
 
     // Enable deconstructing
-    public void Deconstruct(out Expression car, out Expression cdr)
+    public void Deconstruct(out IExpression car, out IExpression cdr)
     {
         car = Car;
         cdr = Cdr;
     }
 
-    public IEnumerator<Expression> GetEnumerator()
+    public IEnumerator<IExpression> GetEnumerator()
     {
         var current = this;
         while (current != null)
@@ -94,5 +96,5 @@ public class Cons : Expression, IEnumerable<Expression>
         return GetEnumerator();
     }
 
-    public Expression? this[int i] => this.Skip(i).First();
+    public IExpression? this[int i] => this.Skip(i).First();
 }

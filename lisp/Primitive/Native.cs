@@ -3,18 +3,18 @@
 namespace lisp.Primitive;
 
 // TODO: Make this less verbose
-public abstract class Native : Atom
+public abstract class Native : IAtom
 {
-    public override Expression Evaluate(IEnvironment environment)
+    public virtual IExpression Evaluate(IEnvironment environment)
     {
         return this;
     }
 
-    public override object ToCompare => this;
+    public virtual object ToCompare => this;
 
-    public abstract Expression Run(IEnvironment environment, Cons args);
+    public abstract IExpression Run(IEnvironment environment, Cons args);
 
-    public override string GetString()
+    public virtual string GetString()
     {
         return $"#<FUNCTION ({GetType().Name})>";
         // TODO: Make it more detailed
@@ -23,7 +23,7 @@ public abstract class Native : Atom
 
 public class Car : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var arg = args.Car?.Evaluate(environment);
         if (arg is not Cons cons) throw new Exception("car requires a list");
@@ -33,7 +33,7 @@ public class Car : Native
 
 public class Plus : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args
             .Select(x => x.Evaluate(environment))
@@ -52,7 +52,7 @@ public class Plus : Native
 
 public class Minus : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args
             .Select(x => x.Evaluate(environment))
@@ -91,7 +91,7 @@ public class Minus : Native
 
 public class Cdr : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var arg = args.Car?.Evaluate(environment);
         if (arg is not Cons cons) throw new Exception("cdr requires a list");
@@ -101,7 +101,7 @@ public class Cdr : Native
 
 public class Quote : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         return args.Car;
     }
@@ -109,7 +109,7 @@ public class Quote : Native
 
 public class ConsFunc : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args
             .Select(x => x.Evaluate(environment))
@@ -122,7 +122,7 @@ public class ConsFunc : Native
 
 public class Eval : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var arg = args.Car.Evaluate(environment);
         return arg.Evaluate(environment);
@@ -131,7 +131,7 @@ public class Eval : Native
 
 public class Exit : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var exitNumber = args.Car?.Evaluate(environment) is IntegerAtom atom
             ? atom.Value
@@ -144,14 +144,14 @@ public class Exit : Native
 public class Eq : Native
 {
     // TODO: Mimic behavior of Common Lisp
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args
             .Select(x => x.Evaluate(environment))
             .ToList();
         if (argList.Count != 2) throw new Exception("eq requires exactly two arguments");
         // TODO: Implement comparing atoms
-        if (argList[0] is not Atom atom1 || argList[1] is not Atom atom2)
+        if (argList[0] is not IAtom atom1 || argList[1] is not IAtom atom2)
             throw new Exception("eq requires arguments to be atoms");
         
         // TODO: Implement comparing values in classes
@@ -161,7 +161,7 @@ public class Eq : Native
 
 public class And : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args
             .Select(x => x.Evaluate(environment))
@@ -182,7 +182,7 @@ public class And : Native
 
 public class Or : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args
             .Select(x => x.Evaluate(environment))
@@ -204,7 +204,7 @@ public class Or : Native
 public class If : Native
 {
     // TODO: Implement cond or when instead
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args.ToList();
         if (argList.Count != 3) throw new Exception("if requires exactly three arguments");
@@ -219,7 +219,7 @@ public class If : Native
 
 public class Define : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args.ToList();
         if (argList.Count != 2) throw new Exception("define requires exactly two arguments");
@@ -236,7 +236,7 @@ public class Define : Native
 
 public class Debug : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         if (!Debugger.IsAttached)
         {
@@ -252,7 +252,7 @@ public class Debug : Native
 
 public class LambdaFunc : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var closure = environment.Closure();
         var (car, cdr) = args;
@@ -268,7 +268,7 @@ public class LambdaFunc : Native
 
 public class ListFunc : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         // TODO: Make cons implement ienumerable
         return Cons.FromIEnumerable(args.Select(x => x.Evaluate(environment)));
@@ -277,10 +277,10 @@ public class ListFunc : Native
 
 public class BeginFunc : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args.ToList();
-        Expression returnVal = null;
+        IExpression returnVal = null;
         foreach (var expression in argList)
         {
             returnVal = expression.Evaluate(environment);
@@ -292,7 +292,7 @@ public class BeginFunc : Native
 
 public class ApplyFunc : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args.ToList();
         if (argList.Count != 2) throw new Exception("apply requires two arguments");
@@ -306,16 +306,16 @@ public class ApplyFunc : Native
 
 public class AtomP : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var value = args.Car?.Evaluate(environment);
-        return new BoolAtom(value is Atom or Cons { IsList: false });
+        return new BoolAtom(value is IAtom or Cons { IsList: false });
     }
 }
 
 public class Concat : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var argList = args
             .Select(x => x.Evaluate(environment))
@@ -332,7 +332,7 @@ public class Concat : Native
 
 public class Print : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var text = args.Car?.Evaluate(environment);
         switch (text)
@@ -352,7 +352,7 @@ public class Print : Native
 
 public class Not : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var value = args.Car?.Evaluate(environment);
         return value switch
@@ -365,7 +365,7 @@ public class Not : Native
 
 public class BiggerThan : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var evaluted = args
             .Select(x => x.Evaluate(environment))
@@ -378,12 +378,12 @@ public class BiggerThan : Native
 
 public class Mapcar : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var lambda = args.Car?.Evaluate(environment) as Lambda;
         var list = args.Cdr?.AsCons().Car?.Evaluate(environment).AsCons();
 
-        List<Expression> results = new();
+        List<IExpression> results = new();
         foreach (var item in list)
         {
             results.Add(lambda.Run(environment, new Cons {Car = item, Cdr = null}));
@@ -395,7 +395,7 @@ public class Mapcar : Native
 
 public class Multiply : Native
 {
-    public override Expression Run(IEnvironment environment, Cons args)
+    public override IExpression Run(IEnvironment environment, Cons args)
     {
         var accumulator = args.Car.AsValue<int>();
         foreach (var item in args.Cdr.AsCons())
