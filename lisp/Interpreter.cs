@@ -14,16 +14,9 @@ public interface IEnvironment
     IEnvironment Closure(); // create a closure
 }
 
-public class Frame
+public record Frame(int Level)
 {
-    public int Level { get; }
-    public Dictionary<string, Expression> Variables { get; }
-    
-    public Frame(int level)
-    {
-        Level = level;
-        Variables = new Dictionary<string, Expression>();
-    }
+    public Dictionary<string, Expression> Variables { get; } = new();
 
     public Expression Get(string symbol) => Variables[symbol];
     public Expression Set(string symbol, Expression value) => Variables[symbol] = value;

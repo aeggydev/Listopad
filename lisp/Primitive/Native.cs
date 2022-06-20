@@ -75,12 +75,11 @@ public class Minus : Native
         }
 
         // TODO: Don't use floats if not needed
-        var first = argList.First().As<IntegerAtom>();
-        var rest = argList.Skip(1).Cast<IntegerAtom>();
-        var sum = Convert.ToSingle(first.Value);
-        foreach (var atom in rest)
+        var rest = argList.Skip(1).Select(x => x.AsValue<int>());
+        var sum = Convert.ToSingle(argList.First().AsValue<int>());
+        foreach (var value in rest)
         {
-            sum -= Convert.ToSingle(atom.Value);
+            sum -= Convert.ToSingle(value);
         }
 
         return argList.Any(x => x is FloatAtom)
@@ -321,10 +320,10 @@ public class Concat : Native
         var argList = args
             .Select(x => x.Evaluate(environment))
             .ToList();
-        var accumulator = argList.First().As<Cons>();
+        var accumulator = argList.First().AsCons();
         foreach (var item in argList.Skip(1))
         {
-            accumulator = Cons.FromIEnumerable(accumulator.Concat(item.As<Cons>()));
+            accumulator = Cons.FromIEnumerable(accumulator.Concat(item.AsCons()));
         }
 
         return accumulator;
@@ -371,7 +370,7 @@ public class BiggerThan : Native
         var evaluted = args
             .Select(x => x.Evaluate(environment))
             .ToList();
-        return evaluted[0].As<IntegerAtom>().Value > evaluted[1].As<IntegerAtom>().Value
+        return evaluted[0].AsValue<int>() > evaluted[1].AsValue<int>()
             ? new BoolAtom(true)
             : new BoolAtom(false);
     }
@@ -382,7 +381,7 @@ public class Mapcar : Native
     public override Expression Run(IEnvironment environment, Cons args)
     {
         var lambda = args.Car?.Evaluate(environment) as Lambda;
-        var list = args.Cdr?.As<Cons>().Car?.Evaluate(environment).As<Cons>();
+        var list = args.Cdr?.AsCons().Car?.Evaluate(environment).AsCons();
 
         List<Expression> results = new();
         foreach (var item in list)
@@ -398,10 +397,10 @@ public class Multiply : Native
 {
     public override Expression Run(IEnvironment environment, Cons args)
     {
-        var accumulator = args.Car.As<IntegerAtom>().Value;
-        foreach (var item in args.Cdr.As<Cons>())
+        var accumulator = args.Car.AsValue<int>();
+        foreach (var item in args.Cdr.AsCons())
         {
-            accumulator *= item.As<IntegerAtom>().Value;
+            accumulator *= item.AsValue<int>();
         }
 
         return new IntegerAtom(accumulator);
