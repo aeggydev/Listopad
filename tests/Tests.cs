@@ -93,15 +93,6 @@ public class InterpreterTests
     }
 
     [Fact]
-    public void Backquote1()
-    {
-        const string code = @"`(1 1)";
-        Interpreter interpreter = new();
-        var expression = interpreter.ReadAndEvalute(code).As<Cons>();
-        Assert.Equal(2, expression.Count());
-    }
-
-    [Fact]
     public void Comment()
     {
         const string code = @"(+ 5 5) ; Adds 5 and 5 together";
@@ -113,22 +104,40 @@ public class InterpreterTests
     }
     
     [Fact]
+    public void Backquote1()
+    {
+        const string code = @"`(1 1)";
+        Interpreter interpreter = new();
+        var expression = interpreter.ReadAndEvalute(code).AsCons();
+        Assert.Equal(2, expression.Count());
+    }
+
+    
+    [Fact]
     public void Backquote2()
     {
         const string code = @"`(1 ~(list 2 3 4))";
         Interpreter interpreter = new();
-        var expression = interpreter.ReadAndEvalute(code).As<Cons>();
+        var expression = interpreter.ReadAndEvalute(code).AsCons();
         Assert.Equal(2, expression.Count());
-        Assert.Equal(3, expression.Last().As<Cons>().Count());
+        Assert.Equal(3, expression.Last().AsCons().Count());
     }
-    
     
     [Fact]
     public void Backquote3()
     {
         const string code = @"`(1 ~@(list 2 3 4))";
         Interpreter interpreter = new();
-        var expression = interpreter.ReadAndEvalute(code).As<Cons>();
+        var expression = interpreter.ReadAndEvalute(code).AsCons();
         Assert.Equal(4, expression.Count());
+    }
+
+    [Fact]
+    public void GetStringSymbol1()
+    {
+        const string code = @"(list 1 (list 'list 2 3 4))";
+        Interpreter interpreter = new();
+        var asString = interpreter.ReadAndEvalute(code).GetString();
+        Assert.Equal("(1 (list 2 3 4))", asString);
     }
 }

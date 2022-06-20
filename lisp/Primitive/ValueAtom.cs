@@ -98,6 +98,7 @@ public abstract class ValueAtom<T> : Atom
         {
             BoolAtom atomBool => atomBool.Value ? "#t" : "#f",
             StringAtom atomString => $"\"{atomString.Value}\"",
+            SymbolAtom atomSymbol => atomSymbol.Value.Name, // TODO: Should be uppercase
             _ => Value.ToString() ?? "ERROR"
         };
     }
