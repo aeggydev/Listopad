@@ -24,8 +24,7 @@ public class Cons : Expression, IEnumerable<Expression>
         {
             case Native native:
                 // TODO: Get rid of this ugly hack
-                environment.Set("*ARGS*", Cdr);
-                return native.Evaluate(environment);
+                return native.Run(environment, Cdr as Cons);
             case Lambda lambda:
                 return lambda.Run(environment, Cdr as Cons);
             default:
