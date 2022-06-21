@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using lisp.Interpreter;
 
 namespace lisp.Primitive;
 
@@ -38,7 +39,7 @@ public class Cons : ISeq
         var expression = Car switch
         {
             Cons consCar => consCar.Evaluate(environment),
-            SymbolAtom atomCar => environment.Get(atomCar.Value.Name),
+            SymbolAtom atomCar => environment.Get(atomCar.Value),
             Lambda => Car,
             Native => Car,
             _ => throw new Exception("Illegal function call")

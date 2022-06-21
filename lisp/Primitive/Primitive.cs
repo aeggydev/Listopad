@@ -1,4 +1,6 @@
-﻿namespace lisp.Primitive;
+﻿using lisp.Interpreter;
+
+namespace lisp.Primitive;
 
 public interface IExpression
 {

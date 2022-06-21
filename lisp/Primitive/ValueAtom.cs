@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using lisp.Interpreter;
 
 namespace lisp.Primitive;
 
@@ -88,7 +89,7 @@ public abstract class ValueAtom<T> : IAtom
     {
         return this switch
         {
-            SymbolAtom symbolAtom => environment.Get(symbolAtom.Value.Name),
+            SymbolAtom symbolAtom => environment.Get(symbolAtom.Value),
             _ => this
         };
     }

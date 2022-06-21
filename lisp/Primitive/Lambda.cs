@@ -1,8 +1,10 @@
-﻿namespace lisp.Primitive;
+﻿using lisp.Interpreter;
+
+namespace lisp.Primitive;
 
 public class Lambda : IAtom
 {
-    private readonly IEnvironment _environment;
+    private IEnvironment _environment;
     public int Arity { get; }
     private readonly List<string> _parameters;
     private readonly ISeq _body;
@@ -15,7 +17,7 @@ public class Lambda : IAtom
 
         var argList = args.ToList();
         Arity = argList.Count;
-        _parameters = argList.Select(x => x.As<SymbolAtom>().Value.Name).ToList();
+        _parameters = argList.Select(x => x.AsValue<Symbol>().Name).ToList();
 
         _body = body;
     }
@@ -34,18 +36,7 @@ public class Lambda : IAtom
     public IExpression Run(IEnvironment environment, Cons? args)
     {
         var argList = args?
-            .Select(x =>
-            {
-                // TODO: This is a horrible way to do it; fix it
-                try
-                {
-                    return x.Evaluate(_environment);
-                }
-                catch
-                {
-                    return x.Evaluate(environment);
-                }
-            })
+            .Select(x => x.Evaluate(_environment))
             .ToList();
         if ((argList?.Count ?? 0) != Arity) throw new Exception("Wrong number of arguments");
 

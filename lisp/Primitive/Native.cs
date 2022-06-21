@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using lisp.Interpreter;
 
 namespace lisp.Primitive;
 
@@ -345,8 +346,7 @@ public class Print : Native
                 break;
         }
 
-        return new IntegerAtom(0);
-        // Should return nil
+        return new Nil();
     }
 }
 

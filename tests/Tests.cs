@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using lisp;
+using lisp.Interpreter;
 using lisp.Primitive;
 using lisp.Reader;
 using Xunit;
