@@ -134,10 +134,7 @@ public class Exit : Native
 {
     public override IExpression Run(IEnvironment environment, Cons args)
     {
-        var exitNumber = args.Car?.Evaluate(environment) is IntegerAtom atom
-            ? atom.Value
-            : 0;
-        System.Environment.Exit(exitNumber);
+        System.Environment.Exit(0);
         throw new Exception("Didn't exit");
     }
 }
