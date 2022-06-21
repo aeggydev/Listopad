@@ -41,21 +41,10 @@ public static partial class Reader
 
                 return new Cons { Car = quoted }
                     .Wrap(new SymbolAtom(new Symbol("quote")));
-            case BackquoteToken:
-                var quoted2 = ParseTokens(tokens);
-
-                throw new NotImplementedException();
-            // TODO: DRY this
-            // if (quoted2 is not Cons)
-            //     return new Cons
-            //     {
-            //         Car = new ValueAtom("quote", AtomTypes.Symbol),
-            //         Cdr = new Cons{Car = quoted2}
-            //     };
             case NilToken:
                 return new Nil();
             default:
-                throw new ArgumentOutOfRangeException(nameof(token));
+                throw new NotImplementedException(nameof(token));
         }
     }
 }

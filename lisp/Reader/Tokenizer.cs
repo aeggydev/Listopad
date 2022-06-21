@@ -55,6 +55,12 @@ public static partial class Reader
                 case '`':
                     tokens.Add(new BackquoteToken());
                     break;
+                case '@':
+                    tokens.Add(new AtToken());
+                    break;
+                case '~':
+                    tokens.Add(new TildeToken());
+                    break;
                 case '"':
                     StringBuilder stringContent = new();
                     char currentChar = str[++i];

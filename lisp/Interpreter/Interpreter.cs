@@ -61,6 +61,17 @@ public class Interpreter
 (begin
   (define inc (lambda (x) (+ x 1)))
   (define dec (lambda (x) (- x 1)))
+  (define abs (lambda (x) (if (< x 0) (* x -1) x)))
+
   (define < (lambda (x y) (if (eq x y) #f (not (> x y)))))
+  (define >= (lambda (x y) (or (eq x y) (> x y))))
+  (define <= (lambda (x y) (or (eq x y) (< x y))))
+
+  (define max (lambda (x y) (if (> x y) x y)))
+  (define min (lambda (x y) (if (< x y) x y)))
+
+  (define when (lambda (x y) (if x (begin (eval y) #t) #f)))
+  (define unless (lambda (x y) (if x #f (begin (eval y) #t))))
+
   (define toggle-debug (lambda () (print ""hi"") (define *debug-on-exception* (not *debug-on-exception*)))))"; 
 }
